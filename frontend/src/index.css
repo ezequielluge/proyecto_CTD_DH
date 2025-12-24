@@ -1,0 +1,79 @@
+:root {
+  font-family: "Open Sans", sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  background-color: #F4F6F8;
+  place-items: top;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+.bg-footer {
+  background-color: #343434;
+  opacity: 1;
+  color: #d9d9d9;
+  height: 80px;
+}
+.bg-footer-content h4{
+  font-size: 18px;
+  line-height: 18px;
+}
+
+
+.navbar {
+  background-color: #F4F6F8;
+}
+.navbar h1 {
+  color: #1E3A5F;
+  font-weight: bold;
+  line-height: 28px;
+  font-size: 28px;
+}
+.btn-primary {
+  font-weight: 600;
+  background-color: #1E3A5F;
+  border-color: #1E3A5F;
+}
+.btn-primary:hover {
+  background-color: #3A6EA5;
+  border-color: #3A6EA5;
+  box-shadow: 1px 0 3px #1e3a5f65;
+}
+
+.btn-secondary {
+  background-color: #3A6EA5;
+  border-color: #3A6EA5;
+} 
+.btn-secondary:hover {
+  background-color: #3a79bd;
+  border-color: #3a79bd;
+  box-shadow: 1px 0 3px #1e3a5f65;
+  transition-duration: 150ms;
+}
+
+.btn-accent {
+  background-color: #2FBF71;
+  border-color: #2FBF71;
+}
+.btn-accent:active {
+  background-color: red;
+  border-color: #2FBF71;
+}
+.btn-accent:hover {
+  background-color: #2bac65;
+  border-color: #2bac65;
+  box-shadow: 1px 0 3px #2bac654e;
+}

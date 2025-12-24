@@ -1,0 +1,21 @@
+.cardContainer {
+    overflow-x: auto;
+}
+.cardContainer::-webkit-scrollbar {
+    width: 0;
+}
+
+.cardContainer NavLink {
+    text-decoration: none;
+}
+
+.card {
+    width: 20vw;
+}
+
+.card-body {
+    text-align: left;
+}
+.card-body h5 {
+    margin: 0;
+}
