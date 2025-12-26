@@ -9,6 +9,11 @@
     text-decoration: none;
 }
 
+.categoryCard img {
+    height: 120px;
+    width: auto;
+}
+
 .card {
     width: 20vw;
 }

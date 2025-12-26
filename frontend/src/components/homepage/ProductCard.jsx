@@ -1,5 +1,6 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
+import "/src/styles/productCard.css"
 
 const ProductCard = ({ product }) => {
     const { id, name, location, rating, services, images } = product;
@@ -11,11 +12,11 @@ const ProductCard = ({ product }) => {
         >
             <div className='card w-100 shadow-sm'>
                 <div className='row g-0'>
-                    <div className='col-4'>
+                    <div className='col-4 productCard-image'>
                         <img
                             className='img-fluid h-100 rounded-start object-fit-cover'
-                            src={images?.[0] || "/img/placeholder.jpg"}
-                            alt="name"
+                            src={images?.[0] || "../../src/assets/placeholder.png"}
+                            alt="Product image"
                         />
                     </div>
                     

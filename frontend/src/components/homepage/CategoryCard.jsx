@@ -7,19 +7,12 @@ const CategoryCard = ({ category }) => {
             className="text-decoration-none"
             to={`/categories/${category.id}`}
         >
-            <div className='card'>
-                {(category.imageUrl == "") ? (
-                    <div className='card-img-top bg-light'>
-                        Image not found.
-                    </div>
-                ) : (
-                    <img
-                        className='card-img-top'
-                        src={`${category.imageUrl}`}
-                        alt="Category image"
-                    />
-
-                )}
+            <div className='card categoryCard'>
+                <img
+                    className='card-img-top object-fit-cover'
+                    src={category.imageUrl || "/src/assets/placeholder.png"}
+                    alt="Category image"
+                />
 
                 <div className='card-body'>
                     <h5 className='card-title'>{`${category.name}`}</h5>
