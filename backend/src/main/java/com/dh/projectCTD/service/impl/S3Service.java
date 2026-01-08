@@ -1,24 +1,25 @@
 package com.dh.projectCTD.service.impl;
 
-import java.io.IOException;
-import java.util.UUID;
-
+import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.*;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class S3Service {
 
-    private final S3Client s3Client;
-
+    private static final Logger logger = LoggerFactory.getLogger(S3Service.class);
+    private S3Client s3Client;
     @Value("${aws.s3.bucket}")
-    private String bucket;
+    private String bucketName;
 
     public S3Service(S3Client s3Client) {
         this.s3Client = s3Client;
@@ -26,28 +27,49 @@ public class S3Service {
 
     public String uploadFile(MultipartFile file) {
         try {
-            String key = "products/" + UUID.randomUUID() + "-" + file.getOriginalFilename();
-
-            PutObjectRequest request = PutObjectRequest.builder()
-                    .bucket(bucket)
-                    .key(key)
-                    .contentType(file.getContentType())
-                    .acl(ObjectCannedACL.PUBLIC_READ)
-                    .build();
-
-            s3Client.putObject(
-                    request,
-                    RequestBody.fromInputStream(file.getInputStream(), file.getSize())
-            );
-
-            return getPublicUrl(key);
-
+            String fileName = file.getOriginalFilename();
+            logger.info("Uploading file: {}", fileName);
+            s3Client.putObject(PutObjectRequest.builder()
+                            .bucket(bucketName)
+                            .key(fileName)
+                            .build(),
+                    software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes()));
+            logger.info("File uploaded successfully: {}", fileName);
+            return "File uploaded successfully: " + fileName;
         } catch (IOException e) {
-            throw new RuntimeException("Error uploading file to S3", e);
+            logger.error("Failed to upload file", e);
+            throw new RuntimeException("Failed to upload file", e);
         }
     }
 
-    private String getPublicUrl(String key) {
-        return "https://" + bucket + ".s3.amazonaws.com/" + key;
+    public List<Object> listFiles() {
+        logger.info("Fetching file list from bucket: {}", bucketName);
+        ListObjectsV2Response listObjects = s3Client.listObjectsV2(ListObjectsV2Request.builder()
+                .bucket(bucketName)
+                .build());
+        List<Object> fileList = listObjects.contents().stream()
+                .map(S3Object::key)
+                .collect(Collectors.toList());
+        logger.info("Files retrieved: {}", fileList);
+        return fileList;
+    }
+
+    public String getFileUrl(String fileName) {
+        logger.info("Generating URL for file: {}", fileName);
+        String url = s3Client.utilities().getUrl(GetUrlRequest.builder()
+                .bucket(bucketName)
+                .key(fileName)
+                .build()).toString();
+        logger.info("Generated URL: {}", url);
+        return url;
+    }
+
+    public void deleteFile(String fileName) {
+        logger.info("Deleting file: {} from bucket: {}", fileName, bucketName);
+        s3Client.deleteObject(DeleteObjectRequest.builder()
+                .bucket(bucketName)
+                .key(fileName)
+                .build());
+        logger.info("File deleted successfully: {}", fileName);
     }
 }

@@ -1,6 +1,5 @@
 package com.dh.projectCTD.service.impl;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -47,10 +46,11 @@ public class ProductService implements IProductService {
         // productEntity.setCategory(categoryEntity);
 
         // Save image in S3 and get URL
-        String imageUrl = s3Service.uploadFile(file);
-        List<String> productImagesUrls = new ArrayList<>();
-        productImagesUrls.add(imageUrl);
-        productEntity.setImages(productImagesUrls.stream().toList());
+        // TODO implementar s3
+        // String imageUrl = s3Service.uploadFile(file);
+        // List<String> productImagesUrls = new ArrayList<>();
+        // productImagesUrls.add(imageUrl);
+        // productEntity.setImages(productImagesUrls.stream().toList());
 
         // Save in DB
         productRepository.save(productEntity);
