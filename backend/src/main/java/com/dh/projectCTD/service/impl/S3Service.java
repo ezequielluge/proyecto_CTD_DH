@@ -10,7 +10,10 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,15 +30,19 @@ public class S3Service {
 
     public String uploadFile(MultipartFile file) {
         try {
-            String fileName = file.getOriginalFilename();
+            String fileName = UUID.randomUUID().toString() + "_"
+                            + file.getOriginalFilename().replace(" ", "_");
+            
             logger.info("Uploading file: {}", fileName);
+
             s3Client.putObject(PutObjectRequest.builder()
                             .bucket(bucketName)
                             .key(fileName)
                             .build(),
                     software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes()));
+            
             logger.info("File uploaded successfully: {}", fileName);
-            return "File uploaded successfully: " + fileName;
+            return fileName;
         } catch (IOException e) {
             logger.error("Failed to upload file", e);
             throw new RuntimeException("Failed to upload file", e);
@@ -64,12 +71,20 @@ public class S3Service {
         return url;
     }
 
-    public void deleteFile(String fileName) {
-        logger.info("Deleting file: {} from bucket: {}", fileName, bucketName);
-        s3Client.deleteObject(DeleteObjectRequest.builder()
-                .bucket(bucketName)
-                .key(fileName)
-                .build());
-        logger.info("File deleted successfully: {}", fileName);
+    public void deleteFileByUrl(String url) {
+        if (url != null && url.contains(bucketName)) {
+            try {
+                String encodedKey = url.substring(url.lastIndexOf("/") + 1);
+                String decodedKey = URLDecoder.decode(encodedKey, StandardCharsets.UTF_8);
+                logger.info("Deleting file with key: {}", decodedKey);
+                
+                s3Client.deleteObject(DeleteObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(decodedKey)
+                        .build());
+            } catch (Exception e) {
+                logger.error("Error deleting file from S3: {}", e.getMessage());
+            }
+        }
     }
 }

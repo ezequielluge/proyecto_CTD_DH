@@ -9,8 +9,8 @@ import com.dh.projectCTD.dto.ProductDTO;
 import com.dh.projectCTD.exception.ResourceNotFoundException;
 
 public interface IProductService {
-    ProductDTO save(ProductDTO dto, MultipartFile file);
-    ProductDTO update(ProductDTO dto) throws Exception;
+    ProductDTO save(ProductDTO dto, List<MultipartFile> files);
+    ProductDTO update(ProductDTO dto, List<MultipartFile> files) throws Exception;
     void deleteById(Long id) throws ResourceNotFoundException;
     Optional<ProductDTO> findById(Long id) throws ResourceNotFoundException;
     List<ProductDTO> findAll();
