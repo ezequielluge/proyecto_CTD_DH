@@ -13,7 +13,7 @@ export const HomePage = () => {
                 <HeroSection />
             </section>
             <div className='container-fluid text-left justify-content-center mt-4'>
-                <CategoriesSection />
+                {/* <CategoriesSection /> */}
                 <ProductsSection />
             </div>
         </>
