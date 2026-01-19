@@ -3,44 +3,50 @@ import { NavLink } from 'react-router-dom'
 import "/src/styles/productCard.css"
 
 const ProductCard = ({ product }) => {
-    const { id, name, location, rating, services, images } = product;
+    const { productId, name, description, address, city, images } = product;
 
     return (
         <NavLink
-            to={`/products/${id}`}
-            className='text-decortation-none text-dark'
+            to={`/products/${productId}`}
+            className='text-reset text-decoration-none'
         >
-            <div className='card w-100 shadow-sm'>
-                <div className='row g-0'>
-                    <div className='col-4 productCard-image'>
-                        <img
-                            className='img-fluid h-100 rounded-start object-fit-cover'
-                            src={images?.[0] || "../../src/assets/placeholder.png"}
-                            alt="Product image"
-                        />
-                    </div>
-                    
-                    <div className='col-8'>
-                        <div className="card-body py-2">
-                            <h6 className="card-title mb-1">{name}</h6>
+            <div className="col-12 main-card" key={product.productId}>
+                <div className="card shadow-sm h-100 w-100">
+                    <div className="row g-0 w-100">
+                        {/* Image */}
+                        <div className="col-md-4 productCard-image">
+                            <img
+                                src={product.images && product.images[0]}
+                                className="img-fluid rounded-start"
+                                alt={product.name}
+                                style={{ width: '100%', height: '100%', minHeight: '200px', objectFit: 'cover' }}
+                            />
+                        </div>
 
-                            <p className="card-text small text-muted mb-1">
-                                {location}
-                            </p>
+                        {/* Content */}
+                        <div className="col-md-8">
+                            <div className="card-body d-flex flex-column h-100">
+                                <div className="d-flex justify-content-between">
+                                    <h5 className="card-title">{product.name}</h5>
+                                    {/* TODO Implementar rating */}
+                                    {/* <span className="badge bg-info text-dark">Rating: {product.productId}</span> */}
+                                </div>
 
-                            <p className="card-text small mb-1">
-                                ⭐ <strong>{rating}</strong>
-                            </p>
+                                <p className="card-text text-muted mb-1">
+                                    <i className="bi bi-geo-alt"></i> {product.city} - {product.address}
+                                </p>
 
-                            <div className="d-flex flex-wrap gap-1">
-                                {services.slice(0, 3).map((service, index) => (
-                                    <span
-                                        key={index}
-                                        className="badge bg-light text-secondary border"
-                                    >
-                                        {service}
-                                    </span>
-                                ))}
+                                <p className="card-text text-truncate productCard-description">
+                                    {product.description}
+                                </p>
+
+                                {/* TODO Implementar servicios */}
+
+                                <div className="d-flex justify-content-end gap-2 mt-3">
+                                    <button className="btn btn-outline-primary">
+                                        Reservar
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>

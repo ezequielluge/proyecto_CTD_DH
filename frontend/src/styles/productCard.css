@@ -1,4 +1,12 @@
-.productCard-image img {
-    width: 120px;
-    height: auto;
+.productCard-image {
+    width: 200px;
+    height: 200px
+}
+
+.main-card {
+    height: 200px;
+}
+
+.productCard-description {
+    max-height: 180px;
 }

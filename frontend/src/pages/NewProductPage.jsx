@@ -1,9 +1,15 @@
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 const NewProductPage = () => {
+    const navigate = useNavigate();
+
     const [files, setFiles] = useState(null);
     const [previews, setPreviews] = useState([]);
     const [status, setStatus] = useState('initial');
+
+    const [nameError, setNameError] = useState("");
 
     const [productData, setProductData] = useState({
         name: '',
@@ -19,7 +25,26 @@ const NewProductPage = () => {
         return () => previews.forEach(url => URL.revokeObjectURL(url));
     }, [previews])
 
+    // #### Checks ####
+    const checkNameDuplicate = async (name) => {
+        if (!name) return;
 
+        try {
+            const res = await fetch(`${url}/check-name?name=${encodeURIComponent(name)}`);
+            const exists = await res.json();
+            
+            if (exists) {
+                setNameError("Este nombre ya esta en uso.");
+            } else {
+                setNameError("");
+            }
+
+        } catch (e) {
+            console.error("Error validando el nombre. ", e);
+        }
+    }
+
+    // #### Handlers ####
     const handleChange = (e) => {
         setProductData({
             ...productData,
@@ -72,12 +97,20 @@ const NewProductPage = () => {
                 const data = await res.json();
                 console.log("Success: ", data);
                 setStatus('success');
+                Swal.fire({
+                    title: '¡Alojamiento agregado!',
+                    text: 'El alojamiento ha sido agregado con éxito. Serás redireccionado en 3 segundos.',
+                    timer: 3000
+                });
+                setTimeout(() => {
+                    navigate('/administracion')
+                }, 3000)
             } else {
                 throw new Error('Error en la respuesta del servidor!');
             }
         }
-        catch (e) {
-            console.error(e);
+        catch (err) {
+            console.error(err);
             setStatus('fail');
         }
     }
@@ -96,12 +129,14 @@ const NewProductPage = () => {
                         <input
                             required
                             type="text"
-                            className="form-control"
+                            className={`form-control ${nameError ? 'is-invalid' : ''}`}
                             id="name"
                             name='name'
-                            placeholder='Ingresar el nombre del producto'
+                            placeholder='Ingresar el nombre del alojamiento'
                             onChange={handleChange}
+                            onBlur={e => checkNameDuplicate(e.target.value)}
                         />
+                        {nameError && <div className='invalid-feedback'>{nameError}</div> }
                     </div>
                     {/* Category dropdown selector */}
                     <div className="col-md-6">
@@ -143,7 +178,7 @@ const NewProductPage = () => {
                     </div>
                     {/* Description text area */}
                     <div className="mb-3">
-                        <label htmlFor="description" className="form-label">Descripción del producto</label>
+                        <label htmlFor="description" className="form-label">Descripción</label>
                         <textarea
                             required
                             className="form-control"
@@ -156,7 +191,7 @@ const NewProductPage = () => {
                     </div>
                     {/* Image upload */}
                     <div className="mb-3">
-                        <label htmlFor="file" className="form-label">Imágenes del producto</label>
+                        <label htmlFor="file" className="form-label">Imágenes del alojamiento</label>
                         <input
                             required
                             className="form-control"
@@ -192,8 +227,7 @@ const NewProductPage = () => {
                     </div>
                 </form>
                 {/* Status */}
-                {status === 'success' && <div className='alert alert-succes mt-3'>¡Producto guardado!</div>}
-                {status === 'fail' && <div className='alert alert-danger mt-3'>¡Error al guardar el producto!</div>}
+                {status === 'fail' && <div className='alert alert-danger mt-3'>¡Error al guardar el alojamiento!</div>}
             </section>
         </>
     )
