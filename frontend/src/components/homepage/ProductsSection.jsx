@@ -7,7 +7,7 @@ const ProductsSection = () => {
     const [products, setProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
 
-    const url = 'http://localhost:8080/products';
+    const url = `${import.meta.env.VITE_API_URL}/products`;
     const { data, isLoading, error } = useFetch(url);
 
     const productsPerPage = 10;
@@ -32,7 +32,7 @@ const ProductsSection = () => {
     }, [data])
 
     const getPaginationRange = () => {
-        const delta = 1; // Cuántas páginas mostrar a la izquierda y derecha de la actual
+        const delta = 1;
         const range = [];
         const rangeWithDots = [];
         let l;
@@ -83,7 +83,7 @@ const ProductsSection = () => {
                             ))}
                         </div>
 
-                        {/* Navbar de Paginación abajo */}
+                        {/* Pages navbar */}
                         <nav className="d-flex justify-content-center mt-4 gap-2">
                             <button
                                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}

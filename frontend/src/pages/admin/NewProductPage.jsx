@@ -19,7 +19,7 @@ const NewProductPage = () => {
         categoryId: 1
     })
 
-    const url = 'http://localhost:8080/products';
+    const url = `${import.meta.env.VITE_API_URL}/products`;
 
     useEffect(() => {
         return () => previews.forEach(url => URL.revokeObjectURL(url));
@@ -50,7 +50,6 @@ const NewProductPage = () => {
             ...productData,
             [e.target.name]: e.target.value
         });
-        console.log(productData);
     };
 
     const handleFileChange = (e) => {
@@ -95,7 +94,6 @@ const NewProductPage = () => {
 
             if (res.ok) {
                 const data = await res.json();
-                console.log("Success: ", data);
                 setStatus('success');
                 Swal.fire({
                     title: '¡Alojamiento agregado!',

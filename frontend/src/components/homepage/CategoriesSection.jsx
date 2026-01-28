@@ -44,19 +44,15 @@ const CategoriesSection = () => {
             "imageUrl": ""
         }
     ]
-    // FETCH:
-    /* 
-    useEffect(() => {
-      fetch("/api/categories")
-        .then(res => res.json())
-        .then(data => setCategories(data));
-    }, []);
-    */
+    // FETCH
+    // const url = `${import.meta.env.VITE_API_URL}/categories`;
+    // const categories = useFetch(url);
 
     return (
         <section className='justify-content-left'>
-            <h3 className='text-align-left' >Categorías</h3>
-            <div className='d-flex flex-row flex-nowrap gap-2 cardContainer'>
+            <h3 className='text-align-left mb-3'>Categorías</h3>
+            {/* DESKTOP */}
+            <div className='d-none d-md-flex flex-row flex-nowrap gap-2 cardContainer'>
                 {categories.map(category => (
                     <div key={category.id}>
                         <CategoryCard
@@ -65,6 +61,16 @@ const CategoriesSection = () => {
                     </div>
                 ))}
             </div>
+            
+            {/* MOBILE */}
+            <div className='d-flex flex-column d-md-none w-100'>
+                {categories.map(category => (
+                    <div key={category.id} className='card p-2 w-75 mb-2 ms-auto me-auto'>
+                        <p className='card-title fw-medium fs-5 m-0 text-center'>{`${category.name}`}</p>
+                    </div>
+                ))}
+            </div>
+
         </section>
     )
 }
