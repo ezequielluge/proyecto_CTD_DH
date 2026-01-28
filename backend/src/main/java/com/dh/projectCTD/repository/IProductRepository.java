@@ -7,4 +7,5 @@ import com.dh.projectCTD.model.Product;
 
 @Repository
 public interface IProductRepository extends JpaRepository<Product, Long>{
+    boolean existsByName(String name);
 }

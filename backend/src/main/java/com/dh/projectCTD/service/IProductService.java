@@ -14,4 +14,5 @@ public interface IProductService {
     void deleteById(Long id) throws ResourceNotFoundException;
     Optional<ProductDTO> findById(Long id) throws ResourceNotFoundException;
     List<ProductDTO> findAll();
+    public boolean existsByName(String name);
 }

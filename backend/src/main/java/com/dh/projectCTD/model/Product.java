@@ -30,7 +30,7 @@ public class Product {
     @Getter @Setter
     private long id;
 
-    @Column(nullable = false)
+    @Column(unique = true, nullable = false)
     @Getter @Setter
     private String name;
 

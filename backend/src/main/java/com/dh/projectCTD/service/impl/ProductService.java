@@ -31,8 +31,12 @@ public class ProductService implements IProductService {
 
     @Override
     public ProductDTO save(ProductDTO dto, List<MultipartFile> files) {
+        if (productRepository.existsByName(dto.getName())) {
+            throw new IllegalStateException("Product with name " + dto.getName() + " already exists!");
+        }
+
         if (files == null || files.isEmpty()) {
-            throw new IllegalStateException("No files provided");
+            throw new IllegalStateException("No files provided!");
         }
 
         // Product entity to save in DB
@@ -193,6 +197,11 @@ public class ProductService implements IProductService {
                     product.getImages().stream().toList()));
         }
         return productDTOs;
+    }
+
+    @Override
+    public boolean existsByName(String name) {
+        return productRepository.existsByName(name);
     }
 
 }
