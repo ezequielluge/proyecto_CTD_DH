@@ -14,6 +14,7 @@ import com.dh.projectCTD.exception.ResourceNotFoundException;
 import com.dh.projectCTD.model.Product;
 import com.dh.projectCTD.repository.IProductRepository;
 import com.dh.projectCTD.service.IProductService;
+import com.dh.projectCTD.service.IS3Service;
 
 import jakarta.transaction.Transactional;
 
@@ -21,10 +22,10 @@ import jakarta.transaction.Transactional;
 public class ProductService implements IProductService {
 
     private IProductRepository productRepository;
-    private final S3Service s3Service;
+    private final IS3Service s3Service;
 
     @Autowired
-    public ProductService(IProductRepository productRepository, S3Service s3Service) {
+    public ProductService(IProductRepository productRepository, IS3Service s3Service) {
         this.productRepository = productRepository;
         this.s3Service = s3Service;
     }
@@ -174,7 +175,6 @@ public class ProductService implements IProductService {
                     // productDtoToReturn.setCategoryId(productEntity.getCategory().getId());
                     return dto;
                 })
-                // Si no existe, lanza la excepción
                 .or(() -> {
                     throw new RuntimeException("Product not found. Id: " + id);
                 });

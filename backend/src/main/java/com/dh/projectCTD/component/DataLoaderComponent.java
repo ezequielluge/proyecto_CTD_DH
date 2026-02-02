@@ -9,8 +9,6 @@ import org.springframework.boot.ApplicationRunner;
 
 import com.dh.projectCTD.model.Product;
 import com.dh.projectCTD.repository.IProductRepository;
-import com.dh.projectCTD.service.impl.ProductService;
-import com.dh.projectCTD.service.impl.S3Service;
 
 public class DataLoaderComponent implements ApplicationRunner {
 
