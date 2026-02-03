@@ -21,8 +21,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.dh.projectCTD.dto.ProductDTO;
+import com.dh.projectCTD.repository.IProductRepository;
 import com.dh.projectCTD.service.IProductService;
 import com.dh.projectCTD.service.IS3Service;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -47,10 +49,14 @@ class ProductControllerTest {
     @Autowired
     private IProductService productService;
 
+    @Autowired
+    private IProductRepository productRepository;
+
     private Long productId;
 
     @BeforeEach
     void setUp() {
+        productRepository.deleteAll();
         dataLoad();
     }
 
@@ -70,14 +76,14 @@ class ProductControllerTest {
                 "img",
                 "img.jpg",
                 MediaType.IMAGE_JPEG_VALUE,
-                "img-data".getBytes()
-        );
+                "img-data".getBytes());
         images.add(img);
 
         ProductDTO savedProduct = productService.save(productDto, images);
         productId = savedProduct.getProductId();
     }
 
+    // GET - ALL PRODUCTS
     @Test
     public void testGetAllProducts() throws Exception {
         MvcResult response = mockMvc.perform(MockMvcRequestBuilders
@@ -89,6 +95,7 @@ class ProductControllerTest {
         assertFalse(response.getResponse().getContentAsString().isEmpty());
     }
 
+    // GET - PRODUCT BY ID SUCCESS
     @Test
     public void testGetProductByIdSuccess() throws Exception {
         mockMvc.perform(get("/products/{id}", productId)
@@ -103,6 +110,7 @@ class ProductControllerTest {
 
     }
 
+    // GET - PRODUCT BY ID NOT FOUND
     @Test
     public void testGetProductByIdNotFound() throws Exception {
         mockMvc.perform(get("/products/{id}", 9999L)
@@ -111,4 +119,115 @@ class ProductControllerTest {
                 .andDo(MockMvcResultHandlers.print());
     }
 
+    // CREATE - PRODUCT WITHOUT IMAGES FAIL
+    @Test
+    public void testCreateProductWithoutImagesFail() throws Exception {
+        ProductDTO newDto = new ProductDTO();
+        newDto.setName("No images product");
+
+        ObjectMapper mapper = new ObjectMapper();
+        String productJson = mapper.writeValueAsString(newDto);
+
+        MockMultipartFile productPart = new MockMultipartFile(
+                "product", "", "application/json", productJson.getBytes());
+
+        mockMvc.perform(multipart("/products")
+                .file(productPart))
+                .andExpect(status().isBadRequest());
+    }
+
+    // CREATE - DUPLICATE PRODUCT NAME
+    @Test
+    public void testCreateProductDuplicateName() throws Exception {
+        ProductDTO duplicateDto = new ProductDTO();
+        duplicateDto.setName("Test Product");
+
+        ObjectMapper mapper = new ObjectMapper();
+        String productJson = mapper.writeValueAsString(duplicateDto);
+
+        MockMultipartFile productPart = new MockMultipartFile(
+                "product", "", "application/json", productJson.getBytes());
+
+        MockMultipartFile filePart = new MockMultipartFile(
+                "files", "test.jpg", "image/jpeg", "image content".getBytes());
+
+        mockMvc.perform(multipart("/products")
+                .file(productPart)
+                .file(filePart))
+                .andExpect(status().isBadRequest());
+    }
+
+    // PUT - UPDATE PRODUCT SUCCESS
+    @Test
+    public void testUpdateProductSuccess() throws Exception {
+        ProductDTO updateDto = new ProductDTO();
+        updateDto.setProductId(productId);
+        updateDto.setName("Updated Product Name");
+        updateDto.setImages(new ArrayList<>());
+
+        ObjectMapper mapper = new ObjectMapper();
+        String productJson = mapper.writeValueAsString(updateDto);
+
+        MockMultipartFile productPart = new MockMultipartFile(
+                "product", "", "application/json", productJson.getBytes());
+
+        MockMultipartFile filePart = new MockMultipartFile(
+                "files", "update.jpg", "image/jpeg", "updated-img-data".getBytes());
+
+        mockMvc.perform(multipart("/products")
+                .file(productPart)
+                .file(filePart)
+                .with(request -> {
+                    request.setMethod("PUT");
+                    return request;
+                }))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.productId").value(productId))
+                .andExpect(jsonPath("$.name").value("Updated Product Name"))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    // UPDATE - PRODUCT NOT FOUND
+    @Test
+    public void testUpdateProductNotFound() throws Exception {
+        ProductDTO updateDto = new ProductDTO();
+        updateDto.setProductId(9999L);
+        updateDto.setName("Non-existent Product");
+        updateDto.setImages(new ArrayList<>());
+
+        ObjectMapper mapper = new ObjectMapper();
+        String productJson = mapper.writeValueAsString(updateDto);
+
+        MockMultipartFile productPart = new MockMultipartFile(
+                "product", "", "application/json", productJson.getBytes());
+
+        MockMultipartFile filePart = new MockMultipartFile(
+                "files", "update.jpg", "image/jpeg", "updated-img-data".getBytes());
+
+        mockMvc.perform(multipart("/products")
+                .file(productPart)
+                .file(filePart)
+                .with(request -> {
+                    request.setMethod("PUT");
+                    return request;
+                }))
+                .andExpect(status().isNotFound())
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    // DELETE - PRODUCT SUCCESS
+    @Test
+    public void testDeleteProductSuccess() throws Exception {
+        mockMvc.perform(delete("/products/{id}", productId))
+                .andExpect(status().isOk())
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    // DELETE - PRODUCT NOT FOUND
+    @Test
+    public void testDeleteProductNotFound() throws Exception {
+        mockMvc.perform(delete("/products/{id}", 9999L))
+                .andExpect(status().isNotFound())
+                .andDo(MockMvcResultHandlers.print());
+    }
 }

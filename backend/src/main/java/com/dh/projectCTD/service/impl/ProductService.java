@@ -7,9 +7,11 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException.BadRequest;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.dh.projectCTD.dto.ProductDTO;
+import com.dh.projectCTD.exception.BadRequestException;
 import com.dh.projectCTD.exception.ResourceNotFoundException;
 import com.dh.projectCTD.model.Product;
 import com.dh.projectCTD.repository.IProductRepository;
@@ -33,11 +35,11 @@ public class ProductService implements IProductService {
     @Override
     public ProductDTO save(ProductDTO dto, List<MultipartFile> files) {
         if (productRepository.existsByName(dto.getName())) {
-            throw new IllegalStateException("Product with name " + dto.getName() + " already exists!");
+            throw new BadRequestException("Product with name " + dto.getName() + " already exists!");
         }
 
         if (files == null || files.isEmpty()) {
-            throw new IllegalStateException("No files provided!");
+            throw new BadRequestException("No files provided!");
         }
 
         // Product entity to save in DB
@@ -79,9 +81,9 @@ public class ProductService implements IProductService {
 
     @Override
     @Transactional
-    public ProductDTO update(ProductDTO dto, List<MultipartFile> files) throws Exception {
+    public ProductDTO update(ProductDTO dto, List<MultipartFile> files) {
         Product productEntity = productRepository.findById(dto.getProductId())
-                .orElseThrow(() -> new Exception("Product not found. Id: " + dto.getProductId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found. Id: " + dto.getProductId()));
 
         // TODO Implementar categorías
         // Category categoryEntity = new Category();
@@ -147,7 +149,7 @@ public class ProductService implements IProductService {
     }
 
     @Override
-    public void deleteById(Long id) throws ResourceNotFoundException {
+    public void deleteById(Long id) {
         Optional<Product> productToDelete = productRepository.findById(id);
         if (productToDelete.isPresent()) {
             // Borrar imágenes de S3
@@ -161,23 +163,21 @@ public class ProductService implements IProductService {
     }
 
     @Override
-    public Optional<ProductDTO> findById(Long id) throws ResourceNotFoundException {
-        return productRepository.findById(id)
-                .map(productEntity -> {
-                    // Mapeo de Entity a DTO
-                    ProductDTO dto = new ProductDTO();
-                    dto.setProductId(productEntity.getId());
-                    dto.setName(productEntity.getName());
-                    dto.setDescription(productEntity.getDescription());
-                    dto.setAddress(productEntity.getAddress());
-                    dto.setCity(productEntity.getCity());
-                    dto.setImages(productEntity.getImages());
-                    // productDtoToReturn.setCategoryId(productEntity.getCategory().getId());
-                    return dto;
-                })
-                .or(() -> {
-                    throw new RuntimeException("Product not found. Id: " + id);
-                });
+    public Optional<ProductDTO> findById(Long id) {
+        Product productEntity = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found. Id: " + id));
+
+        ProductDTO dto = new ProductDTO();
+        dto.setProductId(productEntity.getId());
+        dto.setName(productEntity.getName());
+        dto.setDescription(productEntity.getDescription());
+        dto.setAddress(productEntity.getAddress());
+        dto.setCity(productEntity.getCity());
+        dto.setImages(productEntity.getImages());
+        // TODO Category
+        // productDtoToReturn.setCategoryId(productEntity.getCategory().getId());
+
+        return Optional.of(dto);
     }
 
     @Override
