@@ -15,7 +15,7 @@ const AdminPage = () => {
             {/* Desktop */}
             <div className='d-none d-lg-block'>
                 <section className='m-3'>
-                    <h3 className='mb-2 fw-semibolder'>Panel de administración</h3>
+                    <h3 className='mb-2 fw-semibold'>Panel de administración</h3>
 
                     <div className='d-flex gap-2'>
                         <button className='btn btn-secondary'>

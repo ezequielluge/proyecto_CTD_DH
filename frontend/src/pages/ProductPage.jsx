@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useFetch } from '../hooks/useFetch'
-import NotFound from './NotFound';
 import { useNavigate, useParams, NavLink } from 'react-router-dom';
+import NotFoundPage from './NotFoundPage';
 
 const ProductPage = () => {
     const { id } = useParams();
@@ -25,7 +25,7 @@ const ProductPage = () => {
         }
     }, [data]);
 
-    if (error || !productData) return <NotFound />;
+    if (error || !productData) navigate('/404')
 
     return (
         <>

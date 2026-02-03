@@ -7,6 +7,7 @@ import AdminPage from './pages/admin/AdminPage'
 import AdminProductsPage from './pages/admin/AdminProductsPage'
 import ProductPage from './pages/ProductPage'
 import ProductGalery from './components/product/ProductGalery'
+import NotFoundPage from './pages/NotFoundPage'
 
 function App() {
     return (
@@ -24,9 +25,11 @@ function App() {
                     <Route path='products' element={ <AdminProductsPage /> } />
                     <Route path='new' element={ <NewProductPage /> } />
                 </Route>
+
+                <Route path='/404'>
+                    <Route index element={ <NotFoundPage /> } />
+                </Route>
             </Route>
-
-
 
             <Route path='/*' element={<Navigate to='/' />} />
         </Routes>

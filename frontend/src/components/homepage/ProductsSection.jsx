@@ -70,7 +70,7 @@ const ProductsSection = () => {
             {isLoading
                 ? <h4>Cargando...</h4>
                 : error
-                    ? <h4>Ha ocurrido un error: {error}</h4>
+                    ? <h4>Ha ocurrido un error al cargar los productos.</h4>
                     :
                     <div>
                         <div className='row g-3'>
