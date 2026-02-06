@@ -19,7 +19,7 @@ const ProductGalery = () => {
                             <button
                                 onClick={() => navigate(-1)}
                                 className="btn btn-outline-secondary"
-                            >Volver
+                            >← Volver
                             </button>
                         </div>
                         <div className="row g-3 w-100 h-100">

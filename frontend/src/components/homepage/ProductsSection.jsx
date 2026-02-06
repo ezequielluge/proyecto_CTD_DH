@@ -12,6 +12,16 @@ const ProductsSection = () => {
 
     const productsPerPage = 10;
 
+    useEffect(() => {
+        if (!data?.length) return;
+
+        setProducts(prev => {
+            if (prev.length) return prev;
+            return shuffleArray(data);
+        });
+
+    }, [data]);
+
     const shuffleArray = (array) => {
         const shuffled = [...array];
         for (let i = shuffled.length - 1; i > 0; i--) {
@@ -21,15 +31,6 @@ const ProductsSection = () => {
         return shuffled;
     };
 
-    useEffect(() => {
-        if (!data?.length) return;
-
-        setProducts(prev => {
-            if (prev.length) return prev;
-            return shuffleArray(data);
-        });
-
-    }, [data])
 
     const getPaginationRange = () => {
         const delta = 1;
@@ -71,6 +72,8 @@ const ProductsSection = () => {
                 ? <h4>Cargando...</h4>
                 : error
                     ? <h4>Ha ocurrido un error al cargar los productos.</h4>
+                    : !data.length
+                    ? <h4>No hay alojamientos disponibles.</h4>
                     :
                     <div>
                         <div className='row g-3'>

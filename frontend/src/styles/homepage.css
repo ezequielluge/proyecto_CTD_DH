@@ -7,3 +7,15 @@
     background-repeat: no-repeat;
     background-attachment: scroll;
 }
+
+/* CALENDAR RESPONSIVE */
+@media (max-width: 576px) {
+  .ant-picker-panels {
+    flex-direction: column;
+    min-width: 100% !important;
+  }
+
+  .ant-picker-panel-container {
+    width: 280px !important;
+  }
+}

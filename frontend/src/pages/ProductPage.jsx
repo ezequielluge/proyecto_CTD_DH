@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useFetch } from '../hooks/useFetch'
 import { useNavigate, useParams, NavLink } from 'react-router-dom';
-import NotFoundPage from './NotFoundPage';
 
 const ProductPage = () => {
     const { id } = useParams();
@@ -20,17 +19,16 @@ const ProductPage = () => {
     });
 
     useEffect(() => {
-        if (!error) {
+        if (!error && !isLoading) {
             setProductData(data);
         }
     }, [data]);
-
-    if (error || !productData) navigate('/404')
 
     return (
         <>
             {isLoading
                 ? <p>Cargando...</p>
+                : error ? navigate('/404')
                 :
                 <div className='container-fluid mt-4 w-75'>
                     {/* Header section */}
@@ -44,7 +42,7 @@ const ProductPage = () => {
                                         className='btn btn-outline-secondary'
                                         onClick={() => navigate(-1)}
                                         style={{ height: '40px' }}
-                                    >Volver</button>
+                                    >← Volver</button>
                                 </div>
                             </div>
                             <div className=''>

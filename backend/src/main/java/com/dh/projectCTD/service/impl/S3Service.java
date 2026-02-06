@@ -5,6 +5,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.dh.projectCTD.service.IS3Service;
+
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
@@ -16,7 +19,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-public class S3Service {
+public class S3Service implements IS3Service{
 
     private static final Logger logger = LoggerFactory.getLogger(S3Service.class);
     private S3Client s3Client;
@@ -27,6 +30,7 @@ public class S3Service {
         this.s3Client = s3Client;
     }
 
+    @Override
     public String uploadFile(MultipartFile file) {
         try {
             String fileName = UUID.randomUUID().toString() + "_"
@@ -48,6 +52,7 @@ public class S3Service {
         }
     }
 
+    @Override
     public List<Object> listFiles() {
         logger.info("Fetching file list from bucket: {}", bucketName);
         ListObjectsV2Response listObjects = s3Client.listObjectsV2(ListObjectsV2Request.builder()
@@ -60,6 +65,7 @@ public class S3Service {
         return fileList;
     }
 
+    @Override
     public String getFileUrl(String fileName) {
         logger.info("Generating URL for file: {}", fileName);
         String url = s3Client.utilities().getUrl(GetUrlRequest.builder()
@@ -70,6 +76,7 @@ public class S3Service {
         return url;
     }
 
+    @Override
     public void deleteFileByUrl(String url) {
         if (url != null && url.contains(bucketName)) {
             try {

@@ -108,7 +108,6 @@ const NewProductPage = () => {
             }
         }
         catch (err) {
-            console.error(err);
             setStatus('fail');
         }
     }
@@ -138,7 +137,7 @@ const NewProductPage = () => {
                     </div>
                     {/* Category dropdown selector */}
                     <div className="col-md-6">
-                        <label htmlFor="categoryId" className="form-label" onChange={handleChange}>Categoría</label>
+                        <label htmlFor="categoryId" className="form-label" onChange={handleChange}>Categoría (WIP)</label>
                         <select
                             id="categoryId"
                             className="form-select"
@@ -189,7 +188,7 @@ const NewProductPage = () => {
                     </div>
                     {/* Image upload */}
                     <div className="mb-3">
-                        <label htmlFor="file" className="form-label">Imágenes del alojamiento</label>
+                        <label htmlFor="file" className="form-label">Imágenes del alojamiento (máximo 9 imágenes)</label>
                         <input
                             required
                             className="form-control"

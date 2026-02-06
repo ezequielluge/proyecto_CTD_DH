@@ -82,7 +82,7 @@ const AdminProductsPage = () => {
                                                         <button
                                                             className="btn"
                                                             onClick={() => handleRemove(product.productId)}
-                                                        >🗑️</button>
+                                                        >❌</button>
                                                     </div>
                                                 </td>
                                             </tr>

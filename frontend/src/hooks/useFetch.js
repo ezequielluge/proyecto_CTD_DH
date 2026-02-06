@@ -21,7 +21,6 @@ export const useFetch = (url) => {
                 isLoading: false,
                 error: null
             });
-            console.log(state.data);
         } catch (error) {
             setState({
                 data: null,
