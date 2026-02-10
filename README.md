@@ -20,3 +20,10 @@ Algunos de los tests realizados por el back-end en esta fase son:
 
 Todos con el caso de éxito y casos de errores comunes como lo son al no encontrar el ID del producto.
 
+## Diseño
+La paleta de colores utilizada es:
+- #1E3A5F
+- #3A6EA5
+- #F4F6F8
+- #1F2933
+- #2FBF71
