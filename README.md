@@ -1,4 +1,4 @@
-# Frontend - Reservas de hoteles
+# Proyecto: Reservas de hoteles
 
 ## Propósito
 El propósito del proyecto es crear una aplicación web de reservas con el fin de manejar disponibilidades de los servicios, específicamente alojamiento.
