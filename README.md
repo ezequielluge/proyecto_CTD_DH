@@ -7,7 +7,29 @@ El nombre del sitio será “Fast Booking”
 ## Solución Propuesta
 La solución consiste en el desarrollo de una página web moderna y funcional que cumpla con las historias de usuario planteadas para el Sprint 1.
 El front-end estará basado en React, utilizando Bootstrap como librería de estilos y un componente de ShadCN, específicamente el calendario del hero section.
-El back-end estará diseñado mediante Spring Boot, con models como el Product; y una conexión con AWS S3 para el almacenamiento de las imágenes de los alojamientos.
+El back-end estará diseñado mediante Spring Boot, con models como el Product; y una conexión con AWS S3 para el almacenamiento de las imágenes de los alojamientos cuando se encuentre en producción.
+
+## Ejecución
+El archivo Docker-compose.yml está configurado para un entorno de desarrollo
+por lo que guardará las imágenes en el directorio /backend_uploads en vez de en AWS S3.
+
+Por otro lado, los productos serán persistentes con H2 en el directorio /backend_data.
+
+1. Ejecutar "mvn clean package -DskipTests" en el directorio /backend
+2. Ejecutar "docker-compose up --build" en la raíz del proyecto
+
+Acceso al frontend: http://localhost:5173
+Acceso al backend: http://localhost:8080
+
+Para detener el proyecto ejecutar "docker-compose down"
+
+## Tests
+Para ejecutar los tests se puede realizar de forma general o específicos.
+
+Ejemplos de comandos dentro del directorio /backend:
+- "mvn test"
+- "mvn test -Dtest=ProductControllerTest"
+- "mvn test -Dtest=ProductServiceTest"
 
 ## Sprint 1
 El Sprint 1 del proyecto consta de desarrollar la estructura básica del sitio web de forma tal que se puedan crear, visualizar y eliminar productos.

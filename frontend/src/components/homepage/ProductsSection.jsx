@@ -2,12 +2,13 @@ import React from 'react'
 import ProductCard from "./ProductCard.jsx"
 import { useState, useEffect } from 'react'
 import { useFetch } from '../../hooks/useFetch.js';
+import { PRODUCT_ENDPOINT } from '../../config/config.js';
 
 const ProductsSection = () => {
     const [products, setProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
 
-    const url = `${import.meta.env.VITE_API_URL}/products`;
+    const url = PRODUCT_ENDPOINT;
     const { data, isLoading, error } = useFetch(url);
 
     const productsPerPage = 10;

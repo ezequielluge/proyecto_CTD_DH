@@ -5,7 +5,7 @@ import "../../styles/categoryCard.css"
 
 const CategoriesSection = () => {
 
-    // EJEMPLOS HAY QUE HACER EL FETCH
+    // TODO: Fetch
     const categories = [
         {
             "id": 1233544,
@@ -44,9 +44,6 @@ const CategoriesSection = () => {
             "imageUrl": ""
         }
     ]
-    // FETCH
-    // const url = `${import.meta.env.VITE_API_URL}/categories`;
-    // const categories = useFetch(url);
 
     return (
         <section className='justify-content-left'>

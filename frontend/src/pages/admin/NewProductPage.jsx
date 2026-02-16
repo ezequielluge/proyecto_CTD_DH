@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import { PRODUCT_ENDPOINT } from '../../config/config';
 
 const NewProductPage = () => {
     const navigate = useNavigate();
@@ -19,7 +20,7 @@ const NewProductPage = () => {
         categoryId: 1
     })
 
-    const url = `${import.meta.env.VITE_API_URL}/products`;
+    const url = PRODUCT_ENDPOINT;
 
     useEffect(() => {
         return () => previews.forEach(url => URL.revokeObjectURL(url));
@@ -32,7 +33,7 @@ const NewProductPage = () => {
         try {
             const res = await fetch(`${url}/check-name?name=${encodeURIComponent(name)}`);
             const exists = await res.json();
-            
+
             if (exists) {
                 setNameError("Este nombre ya esta en uso.");
             } else {
@@ -115,7 +116,14 @@ const NewProductPage = () => {
     return (
         <>
             <section className='m-3'>
-                <h4>Nuevo producto</h4>
+                <div className='d-flex justify-content-between align-items-center mb-4'>
+                    <h4 className='mb-0'>Nuevo producto:</h4>
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="btn btn-outline-secondary"
+                    >← Volver
+                    </button>
+                </div>
 
                 <form
                     className="row g-3 mt-2"
@@ -133,7 +141,7 @@ const NewProductPage = () => {
                             onChange={handleChange}
                             onBlur={e => checkNameDuplicate(e.target.value)}
                         />
-                        {nameError && <div className='invalid-feedback'>{nameError}</div> }
+                        {nameError && <div className='invalid-feedback'>{nameError}</div>}
                     </div>
                     {/* Category dropdown selector */}
                     <div className="col-md-6">

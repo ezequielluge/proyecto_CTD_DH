@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
-public interface IS3Service {
+public interface IStorageService {
     public String uploadFile(MultipartFile file);
     public List<Object> listFiles();
     public String getFileUrl(String fileName);

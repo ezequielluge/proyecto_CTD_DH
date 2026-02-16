@@ -1,0 +1,21 @@
+services:
+  backend:
+    build: ./backend
+    container_name: project-backend
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend_data:/data       # H2 
+      - ./backend_uploads:/uploads # Images
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+
+  frontend:
+    build: ./frontend
+    container_name: project-frontend
+    ports:
+      - "5173:5173" # Default Vite port
+    environment:
+      - VITE_API_URL=http://localhost:8080
+    depends_on:
+      - backend

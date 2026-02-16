@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useFetch } from '../hooks/useFetch'
 import { useNavigate, useParams, NavLink } from 'react-router-dom';
+import { PRODUCT_ENDPOINT } from '../config/config';
 
 const ProductPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
 
-    const url = `${import.meta.env.VITE_API_URL}/products/${id}`;
+    const url = `${PRODUCT_ENDPOINT}/${id}`;
     const { data, isLoading, error } = useFetch(url);
 
     const [productData, setProductData] = useState({

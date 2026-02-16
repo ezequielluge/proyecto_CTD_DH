@@ -1,19 +1,22 @@
 import React, { useEffect, useState } from 'react'
 import { useFetch } from '../../hooks/useFetch.js';
 import Swal from 'sweetalert2';
+import { PRODUCT_ENDPOINT } from '../../config/config.js';
+import { useNavigate } from 'react-router-dom';
 
 const AdminProductsPage = () => {
     const [products, setProducts] = useState([]);
+    const navigate = useNavigate();
 
-    const url = `${import.meta.env.VITE_API_URL}/products`;
+    const url = PRODUCT_ENDPOINT;
     const { data, isLoading, error } = useFetch(url);
 
     useEffect(() => {
-        if(data) {
+        if (data) {
             setProducts(data);
         }
     }, [data])
-    
+
 
     const handleRemove = (id) => {
         Swal.fire({
@@ -52,12 +55,19 @@ const AdminProductsPage = () => {
     return (
         <>
             <div className='m-3'>
-                <h4 className='' >Alojamientos:</h4>
+                <div className='d-flex justify-content-between align-items-center mb-4'>
+                    <h4 className='mb-0'>Listado de productos:</h4>
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="btn btn-outline-secondary"
+                    >← Volver
+                    </button>
+                </div>
                 <div className='w-100 mt-3'>
                     {isLoading
                         ? <p>Cargando productos...</p>
                         : error
-                            ? <p>Ha ocurrido un error al cargar los productos: ${error}.</p>
+                            ? <p>Ha ocurrido un error al cargar los productos.</p>
                             :
                             <table className='table table-light table-striped border'>
                                 <thead>

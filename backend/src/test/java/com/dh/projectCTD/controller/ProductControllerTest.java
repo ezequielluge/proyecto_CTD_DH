@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -23,7 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.dh.projectCTD.dto.ProductDTO;
 import com.dh.projectCTD.repository.IProductRepository;
 import com.dh.projectCTD.service.IProductService;
-import com.dh.projectCTD.service.IS3Service;
+import com.dh.projectCTD.service.IStorageService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -31,12 +32,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 
-@SpringBootTest(properties = {
-        "aws.accessKeyId=fakeKey",
-        "aws.secretAccessKey=fakeSecret",
-        "aws.region=us-east-1",
-        "aws.s3.bucket=fake-bucket"
-})
+@SpringBootTest
+@ActiveProfiles("test")
 @AutoConfigureMockMvc
 class ProductControllerTest {
 
@@ -44,7 +41,7 @@ class ProductControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private IS3Service s3Service;
+    private IStorageService storageService;
 
     @Autowired
     private IProductService productService;
@@ -62,7 +59,7 @@ class ProductControllerTest {
 
     void dataLoad() {
         // Mock S3 upload to return a fake URL
-        when(s3Service.uploadFile(any())).thenReturn("http://fake-s3-url.com/img.jpg");
+        when(storageService.uploadFile(any())).thenReturn("http://fake-s3-url.com/img.jpg");
 
         // New product
         ProductDTO productDto = new ProductDTO();
@@ -97,7 +94,7 @@ class ProductControllerTest {
 
     // GET - PRODUCT BY ID SUCCESS
     @Test
-    public void testGetProductByIdSuccess() throws Exception {
+    public void testGetProductById_Success() throws Exception {
         mockMvc.perform(get("/products/{id}", productId)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
@@ -112,7 +109,7 @@ class ProductControllerTest {
 
     // GET - PRODUCT BY ID NOT FOUND
     @Test
-    public void testGetProductByIdNotFound() throws Exception {
+    public void testGetProductById_NotFound() throws Exception {
         mockMvc.perform(get("/products/{id}", 9999L)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isNotFound())
@@ -121,7 +118,7 @@ class ProductControllerTest {
 
     // CREATE - PRODUCT WITHOUT IMAGES FAIL
     @Test
-    public void testCreateProductWithoutImagesFail() throws Exception {
+    public void testCreateProductWithoutImages_Fail() throws Exception {
         ProductDTO newDto = new ProductDTO();
         newDto.setName("No images product");
 
@@ -136,9 +133,9 @@ class ProductControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    // CREATE - DUPLICATE PRODUCT NAME
+    // CREATE - DUPLICATE PRODUCT NAME FAIL
     @Test
-    public void testCreateProductDuplicateName() throws Exception {
+    public void testCreateProductDuplicateName_Fail() throws Exception {
         ProductDTO duplicateDto = new ProductDTO();
         duplicateDto.setName("Test Product");
 
@@ -159,7 +156,7 @@ class ProductControllerTest {
 
     // PUT - UPDATE PRODUCT SUCCESS
     @Test
-    public void testUpdateProductSuccess() throws Exception {
+    public void testUpdateProduct_Success() throws Exception {
         ProductDTO updateDto = new ProductDTO();
         updateDto.setProductId(productId);
         updateDto.setName("Updated Product Name");
@@ -189,7 +186,7 @@ class ProductControllerTest {
 
     // UPDATE - PRODUCT NOT FOUND
     @Test
-    public void testUpdateProductNotFound() throws Exception {
+    public void testUpdateProduct_NotFound() throws Exception {
         ProductDTO updateDto = new ProductDTO();
         updateDto.setProductId(9999L);
         updateDto.setName("Non-existent Product");
@@ -217,7 +214,7 @@ class ProductControllerTest {
 
     // DELETE - PRODUCT SUCCESS
     @Test
-    public void testDeleteProductSuccess() throws Exception {
+    public void testDeleteProduct_Success() throws Exception {
         mockMvc.perform(delete("/products/{id}", productId))
                 .andExpect(status().isOk())
                 .andDo(MockMvcResultHandlers.print());
@@ -225,7 +222,7 @@ class ProductControllerTest {
 
     // DELETE - PRODUCT NOT FOUND
     @Test
-    public void testDeleteProductNotFound() throws Exception {
+    public void testDeleteProduct_NotFound() throws Exception {
         mockMvc.perform(delete("/products/{id}", 9999L))
                 .andExpect(status().isNotFound())
                 .andDo(MockMvcResultHandlers.print());

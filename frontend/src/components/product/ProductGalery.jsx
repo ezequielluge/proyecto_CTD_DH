@@ -1,10 +1,11 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useFetch } from '/src/hooks/useFetch';
+import { PRODUCT_ENDPOINT } from '../../config/config';
 
 const ProductGalery = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { data, isLoading, error } = useFetch(`${import.meta.env.VITE_API_URL}/products/${id}`);
+    const { data, isLoading, error } = useFetch(`${PRODUCT_ENDPOINT}/${id}`);
 
     return (
         <div className="container p-4 mt-4 mb-4 bg-light border rounded">

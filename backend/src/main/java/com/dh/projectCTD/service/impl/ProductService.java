@@ -15,7 +15,7 @@ import com.dh.projectCTD.exception.ResourceNotFoundException;
 import com.dh.projectCTD.model.Product;
 import com.dh.projectCTD.repository.IProductRepository;
 import com.dh.projectCTD.service.IProductService;
-import com.dh.projectCTD.service.IS3Service;
+import com.dh.projectCTD.service.IStorageService;
 
 import jakarta.transaction.Transactional;
 
@@ -23,12 +23,12 @@ import jakarta.transaction.Transactional;
 public class ProductService implements IProductService {
 
     private IProductRepository productRepository;
-    private final IS3Service s3Service;
+    private final IStorageService storageService;
 
     @Autowired
-    public ProductService(IProductRepository productRepository, IS3Service s3Service) {
+    public ProductService(IProductRepository productRepository, IStorageService storageService) {
         this.productRepository = productRepository;
-        this.s3Service = s3Service;
+        this.storageService = storageService;
     }
 
     @Override
@@ -56,8 +56,8 @@ public class ProductService implements IProductService {
         // Save image in S3 and get URL
         List<String> imageUrls = files.stream()
                 .map(file -> {
-                    String fileName = s3Service.uploadFile(file);
-                    return s3Service.getFileUrl(fileName);
+                    String fileName = storageService.uploadFile(file);
+                    return storageService.getFileUrl(fileName);
                 })
                 .collect(Collectors.toList());
         productEntity.setImages(imageUrls);
@@ -88,33 +88,28 @@ public class ProductService implements IProductService {
         // Category categoryEntity = new Category();
         // categoryEntity.setId(dto.getCategoryId());
 
-        // Lista de URLs que el usuario envió en el JSON (lo que quiere que quede)
+        // User URLs from DTO
         List<String> dtoUrls = dto.getImages() != null ? dto.getImages() : new ArrayList<>();
 
-        // Lista de URLs que existen actualmente en la base de datos
+        // Urls filter to keep and to delete
         List<String> dbUrls = new ArrayList<>(productEntity.getImages());
-
-        // Intersección: URLs que están en AMBOS (las que se conservan)
         List<String> urlsToKeep = dbUrls.stream()
                 .filter(dtoUrls::contains)
                 .collect(Collectors.toList());
 
-        // Diferencia: URLs que están en la DB pero NO en el DTO (las que hay que borrar
-        // de S3)
         List<String> urlsToDelete = dbUrls.stream()
                 .filter(url -> !dtoUrls.contains(url))
                 .collect(Collectors.toList());
 
-        // 2. Ejecutar el borrado físico en S3
-        urlsToDelete.forEach(s3Service::deleteFileByUrl);
+        urlsToDelete.forEach(storageService::deleteFileByUrl);
 
-        // 3. Procesar archivos nuevos (binarios) si existen
+        // New images to upload
         List<String> newImgUrls = new ArrayList<>();
         if (files != null && !files.isEmpty()) {
             newImgUrls = files.stream()
                     .map(file -> {
-                        String fileName = s3Service.uploadFile(file);
-                        return s3Service.getFileUrl(fileName);
+                        String fileName = storageService.uploadFile(file);
+                        return storageService.getFileUrl(fileName);
                     })
                     .collect(Collectors.toList());
         }
@@ -151,10 +146,9 @@ public class ProductService implements IProductService {
     public void deleteById(Long id) {
         Optional<Product> productToDelete = productRepository.findById(id);
         if (productToDelete.isPresent()) {
-            // Borrar imágenes de S3
             List<String> imageUrls = productToDelete.get().getImages();
-            imageUrls.forEach(s3Service::deleteFileByUrl);
-            // Borrar producto de la DB
+            imageUrls.forEach(storageService::deleteFileByUrl);
+            
             productRepository.deleteById(id);
         } else {
             throw new ResourceNotFoundException("Product not found. Id: " + id);

@@ -8,27 +8,31 @@ import AdminProductsPage from './pages/admin/AdminProductsPage'
 import ProductPage from './pages/ProductPage'
 import ProductGalery from './components/product/ProductGalery'
 import NotFoundPage from './pages/NotFoundPage'
+import AdminPageLayout from './components/AdminPageLayout'
 
 function App() {
     return (
         <Routes>
+            {/* Public routes */}
             <Route path='/' element={<MainLayout />} >
                 <Route index element={<HomePage />} />
-                
+
                 <Route path='/products/:id'>
-                    <Route index element={ <ProductPage /> } />
-                    <Route path='images' element={ <ProductGalery /> } />
+                    <Route index element={<ProductPage />} />
+                    <Route path='images' element={<ProductGalery />} />
                 </Route>
+            </Route>
 
-                <Route path='/administracion'>
-                    <Route index element={ <AdminPage /> } />
-                    <Route path='products' element={ <AdminProductsPage /> } />
-                    <Route path='new' element={ <NewProductPage /> } />
-                </Route>
+            {/* Not found route */}
+            <Route path='/404' element={ <MainLayout /> } >
+                <Route index element={<NotFoundPage />} />
+            </Route>
 
-                <Route path='/404'>
-                    <Route index element={ <NotFoundPage /> } />
-                </Route>
+            {/* Admin routes */}
+            <Route path='/administracion' element={<AdminPageLayout />} >
+                <Route index element={<AdminPage />} />
+                <Route path='products' element={<AdminProductsPage />} />
+                <Route path='new' element={<NewProductPage />} />
             </Route>
 
             <Route path='/*' element={<Navigate to='/' />} />
