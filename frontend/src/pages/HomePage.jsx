@@ -1,5 +1,3 @@
-import React from 'react'
-
 import "../styles/homepage.css"
 
 import HeroSection from '../components/homepage/HeroSection'

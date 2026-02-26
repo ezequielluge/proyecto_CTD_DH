@@ -1,4 +1,3 @@
-import React from 'react'
 import ProductCard from "./ProductCard.jsx"
 import { useState, useEffect } from 'react'
 import { useFetch } from '../../hooks/useFetch.js';

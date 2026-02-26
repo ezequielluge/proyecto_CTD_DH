@@ -9,11 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.dh.projectCTD.dto.CategoryDTO;
 import com.dh.projectCTD.dto.ProductDTO;
 import com.dh.projectCTD.exception.BadRequestException;
 import com.dh.projectCTD.exception.ResourceNotFoundException;
+import com.dh.projectCTD.model.Category;
 import com.dh.projectCTD.model.Product;
 import com.dh.projectCTD.repository.IProductRepository;
+import com.dh.projectCTD.service.ICategoryService;
 import com.dh.projectCTD.service.IProductService;
 import com.dh.projectCTD.service.IStorageService;
 
@@ -24,11 +27,13 @@ public class ProductService implements IProductService {
 
     private IProductRepository productRepository;
     private final IStorageService storageService;
+    private final ICategoryService categoryService;
 
     @Autowired
-    public ProductService(IProductRepository productRepository, IStorageService storageService) {
+    public ProductService(IProductRepository productRepository, IStorageService storageService, ICategoryService categoryService) {
         this.productRepository = productRepository;
         this.storageService = storageService;
+        this.categoryService = categoryService;
     }
 
     @Override
@@ -48,10 +53,9 @@ public class ProductService implements IProductService {
         productEntity.setAddress(dto.getAddress());
         productEntity.setCity(dto.getCity());
 
-        // TODO Implementar categorías
-        // Category categoryEntity = new Category();
-        // categoryEntity.setId(dto.getCategoryId());
-        // productEntity.setCategory(categoryEntity);
+        Category category = new Category();
+        category.setId(dto.getCategoryId());
+        productEntity.setCategory(category);
 
         // Save image in S3 and get URL
         List<String> imageUrls = files.stream()
@@ -64,6 +68,7 @@ public class ProductService implements IProductService {
 
         // Save in DB
         productRepository.save(productEntity);
+        categoryService.incrementProductsCount(dto.getCategoryId());
 
         // DTO to return
         ProductDTO productDtoToReturn = new ProductDTO();
@@ -73,7 +78,8 @@ public class ProductService implements IProductService {
         productDtoToReturn.setAddress(productEntity.getAddress());
         productDtoToReturn.setCity(productEntity.getCity());
         productDtoToReturn.setImages(productEntity.getImages());
-        // productDtoToReturn.setCategoryId(productEntity.getCategory().getId());
+        productDtoToReturn.setCategoryId(productEntity.getCategory().getId());
+        productDtoToReturn.setCategoryName(categoryService.findById(dto.getCategoryId()).map(CategoryDTO::getName).orElse(null));
 
         return productDtoToReturn;
     }
@@ -84,9 +90,8 @@ public class ProductService implements IProductService {
         Product productEntity = productRepository.findById(dto.getProductId())
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found. Id: " + dto.getProductId()));
 
-        // TODO Implementar categorías
-        // Category categoryEntity = new Category();
-        // categoryEntity.setId(dto.getCategoryId());
+        Category categoryEntity = new Category();
+        categoryEntity.setId(dto.getCategoryId());
 
         // User URLs from DTO
         List<String> dtoUrls = dto.getImages() != null ? dto.getImages() : new ArrayList<>();
@@ -136,8 +141,8 @@ public class ProductService implements IProductService {
         productDtoToReturn.setDescription(productEntity.getDescription());
         productDtoToReturn.setAddress(productEntity.getAddress());
         productDtoToReturn.setCity(productEntity.getCity());
-        // TODO Implementar categorías
-        // productDtoToReturn.setCategoryId(productEntity.get().getCategory().getId());
+        productDtoToReturn.setCategoryId(productEntity.getCategory().getId());
+        productDtoToReturn.setCategoryName(categoryService.findById(dto.getCategoryId()).map(CategoryDTO::getName).orElse(null));
 
         return productDtoToReturn;
     }
@@ -148,6 +153,8 @@ public class ProductService implements IProductService {
         if (productToDelete.isPresent()) {
             List<String> imageUrls = productToDelete.get().getImages();
             imageUrls.forEach(storageService::deleteFileByUrl);
+
+            categoryService.decrementProductsCount(productToDelete.get().getCategory().getId());
             
             productRepository.deleteById(id);
         } else {
@@ -167,8 +174,8 @@ public class ProductService implements IProductService {
         dto.setAddress(productEntity.getAddress());
         dto.setCity(productEntity.getCity());
         dto.setImages(productEntity.getImages());
-        // TODO Category
-        // productDtoToReturn.setCategoryId(productEntity.getCategory().getId());
+        dto.setCategoryId(productEntity.getCategory().getId());
+        dto.setCategoryName(categoryService.findById(dto.getCategoryId()).map(CategoryDTO::getName).orElse(null));
 
         return Optional.of(dto);
     }
@@ -182,12 +189,14 @@ public class ProductService implements IProductService {
         for (Product product : products) {
             productDTOs.add(new ProductDTO(
                     product.getId(),
-                    // product.getCategory().getId(),
+                    product.getCategory().getId(),
+                    categoryService.findById(product.getCategory().getId()).map(CategoryDTO::getName).orElse(null),
                     product.getName(),
                     product.getDescription(),
                     product.getAddress(),
                     product.getCity(),
-                    product.getImages().stream().toList()));
+                    product.getImages().stream().toList()
+                ));
         }
         return productDTOs;
     }
@@ -195,6 +204,24 @@ public class ProductService implements IProductService {
     @Override
     public boolean existsByName(String name) {
         return productRepository.existsByName(name);
+    }
+
+    @Override
+    public List<ProductDTO> findByCategories(List<Long> categoryIds) {
+        List<Product> products = productRepository.findByCategory_IdIn(categoryIds);
+
+        return products.stream()
+                .map(product -> new ProductDTO(
+                        product.getId(),
+                        product.getCategory().getId(),
+                        categoryService.findById(product.getCategory().getId()).map(CategoryDTO::getName).orElse(null),
+                        product.getName(),
+                        product.getDescription(),
+                        product.getAddress(),
+                        product.getCity(),
+                        product.getImages().stream().toList()
+                ))
+                .collect(Collectors.toList());
     }
 
 }

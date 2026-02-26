@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { PRODUCT_ENDPOINT } from '../../config/config';
+import { CATEGORY_ENDPOINT, PRODUCT_ENDPOINT } from '../../config/config';
+import { useFetch } from '../../hooks/useFetch';
 
 const NewProductPage = () => {
     const navigate = useNavigate();
 
     const [files, setFiles] = useState(null);
-    const [previews, setPreviews] = useState([]);
+    const [preview, setPreview] = useState([]);
     const [status, setStatus] = useState('initial');
 
     const [nameError, setNameError] = useState("");
@@ -22,11 +23,27 @@ const NewProductPage = () => {
 
     const url = PRODUCT_ENDPOINT;
 
-    useEffect(() => {
-        return () => previews.forEach(url => URL.revokeObjectURL(url));
-    }, [previews])
+    // Categories
+    const categoriesUrl = CATEGORY_ENDPOINT;
+    const [categories, setCategories] = useState(null);
+    const {
+        data: categoriesData,
+        isLoading: isCategoriesLoading,
+        error: categoriesError
+    } = useFetch(categoriesUrl);
 
-    // #### Checks ####
+    useEffect(() => {
+        if (!isCategoriesLoading && !categoriesError) {
+            setCategories(categoriesData);
+        }
+    }, [categoriesData])
+
+    // Image preview
+    useEffect(() => {
+        return () => preview.forEach(url => URL.revokeObjectURL(url));
+    }, [preview])
+
+    // Validations
     const checkNameDuplicate = async (name) => {
         if (!name) return;
 
@@ -45,7 +62,7 @@ const NewProductPage = () => {
         }
     }
 
-    // #### Handlers ####
+    // Handlers
     const handleChange = (e) => {
         setProductData({
             ...productData,
@@ -58,9 +75,8 @@ const NewProductPage = () => {
         setFiles(selectedFiles);
         setStatus('initial');
 
-        const newPreviews = selectedFiles.map(file => URL.createObjectURL(file));
-        setPreviews(newPreviews);
-
+        const newPreview = selectedFiles.map(file => URL.createObjectURL(file));
+        setPreview(newPreview);
     }
 
     const handleSubmit = async (e) => {
@@ -75,12 +91,11 @@ const NewProductPage = () => {
         const formData = new FormData();
 
         formData.append('product', new Blob([JSON.stringify({
+            categoryId: productData.categoryId,
             name: productData.name,
-            address: productData.address,
-            city: productData.city,
             description: productData.description,
-            // TODO Implementar categoría
-            // categoryId: productData.categoryId
+            address: productData.address,
+            city: productData.city
         })], { type: 'application/json' }));
 
         Array.from(files).forEach((file) => {
@@ -127,6 +142,7 @@ const NewProductPage = () => {
 
                 <form
                     className="row g-3 mt-2"
+                    onSubmit={handleSubmit}
                 >
                     {/* Name input */}
                     <div className="col-md-6">
@@ -137,7 +153,8 @@ const NewProductPage = () => {
                             className={`form-control ${nameError ? 'is-invalid' : ''}`}
                             id="name"
                             name='name'
-                            placeholder='Ingresar el nombre del alojamiento'
+                            placeholder='Ingresar el nombre del alojamiento (máx. 80 caracteres)'
+                            maxLength={80}
                             onChange={handleChange}
                             onBlur={e => checkNameDuplicate(e.target.value)}
                         />
@@ -145,14 +162,29 @@ const NewProductPage = () => {
                     </div>
                     {/* Category dropdown selector */}
                     <div className="col-md-6">
-                        <label htmlFor="categoryId" className="form-label" onChange={handleChange}>Categoría (WIP)</label>
+                        <label htmlFor="categoryId" className="form-label">Categoría</label>
                         <select
+                            required
                             id="categoryId"
                             className="form-select"
                             name='categoryId'
+                            disabled={isCategoriesLoading || categories?.length == 0}
+                            onChange={handleChange}
                         >
-                            <option value="1">Hoteles</option>
-                            <option value="2">Cabañas</option>
+                            <option value="">
+                                {isCategoriesLoading
+                                    ? "Cargando..."
+                                    : categories?.length == 0
+                                        ? "No existen categorías."
+                                        : "Seleccione una categoría"
+                                }
+                            </option>
+                            {categories != null && !isCategoriesLoading && categories.map((cat) => (
+                                <option
+                                    key={cat.categoryId}
+                                    value={cat.categoryId}
+                                >{cat.name}</option>
+                            ))}
                         </select>
                     </div>
                     {/* Address input */}
@@ -191,6 +223,7 @@ const NewProductPage = () => {
                             name='description'
                             rows="3"
                             placeholder='Máximo 2000 caracteres'
+                            maxLength={2000}
                             onChange={handleChange}
                         />
                     </div>
@@ -206,9 +239,9 @@ const NewProductPage = () => {
                             onChange={handleFileChange}
                         />
                     </div>
-                    {/* Previsualización de imágenes */}
+                    {/* Images preview */}
                     <div className='row g-2 mb-3'>
-                        {previews.map((previewUrl, index) => (
+                        {preview.map((previewUrl, index) => (
                             <div key={index} className='col-3 position-relative'>
                                 <img
                                     src={previewUrl}
@@ -221,11 +254,13 @@ const NewProductPage = () => {
                     </div>
 
                     <div className="col-12">
+                        {categories?.length == 0
+                            && <p className='fw-semibold'>¡Cree una categoría antes de continuar!</p>
+                        }
                         <button
                             type="submit"
                             className="btn btn-primary"
-                            disabled={status === 'uploading'}
-                            onClick={handleSubmit}
+                            disabled={status === 'uploading' || categories?.length == 0}
                         >
                             {status === 'uploading' ? 'Cargando...' : 'Agregar'}
                         </button>

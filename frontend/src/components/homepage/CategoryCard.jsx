@@ -1,11 +1,12 @@
-import { NavLink } from 'react-router-dom'
-// import "../../styles/categoryCard.css"
+import { NavLink, useNavigate } from 'react-router-dom'
 
 const CategoryCard = ({ category }) => {
+    const navigate = useNavigate();
+
     return (
         <NavLink
             className="text-decoration-none"
-            to={`/categories/${category.id}`}
+            to={`/products?categoryId=${category.categoryId}`}
         >
             {/* DESKTOP */}
             <div className='d-none d-md-flex card categoryCard'>
@@ -17,7 +18,6 @@ const CategoryCard = ({ category }) => {
 
                 <div className='card-body pt-2'>
                     <p className='card-title text-truncate fw-medium fs-5 mb-0'>{`${category.name}`}</p>
-                    {/* <p className='card-text'>Cantidad de productos: {`${category.productsQty}`}</p> */}
                 </div>
             </div>
         </NavLink>

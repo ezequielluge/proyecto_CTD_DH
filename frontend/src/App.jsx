@@ -8,7 +8,10 @@ import AdminProductsPage from './pages/admin/AdminProductsPage'
 import ProductPage from './pages/ProductPage'
 import ProductGalery from './components/product/ProductGalery'
 import NotFoundPage from './pages/NotFoundPage'
+import NewCategoryPage from './pages/admin/NewCategoryPage'
 import AdminPageLayout from './components/AdminPageLayout'
+import AdminCategoriesPage from './pages/admin/AdminCategoriesPage'
+import AllProductsPage from './pages/AllProductsPage'
 
 function App() {
     return (
@@ -17,6 +20,8 @@ function App() {
             <Route path='/' element={<MainLayout />} >
                 <Route index element={<HomePage />} />
 
+                <Route path='/products' element={<AllProductsPage />} />
+
                 <Route path='/products/:id'>
                     <Route index element={<ProductPage />} />
                     <Route path='images' element={<ProductGalery />} />
@@ -24,7 +29,7 @@ function App() {
             </Route>
 
             {/* Not found route */}
-            <Route path='/404' element={ <MainLayout /> } >
+            <Route path='/404' element={<MainLayout />} >
                 <Route index element={<NotFoundPage />} />
             </Route>
 
@@ -33,6 +38,8 @@ function App() {
                 <Route index element={<AdminPage />} />
                 <Route path='products' element={<AdminProductsPage />} />
                 <Route path='new' element={<NewProductPage />} />
+                <Route path='categories' element={<AdminCategoriesPage />} />
+                <Route path='new-cat' element={<NewCategoryPage />} />
             </Route>
 
             <Route path='/*' element={<Navigate to='/' />} />

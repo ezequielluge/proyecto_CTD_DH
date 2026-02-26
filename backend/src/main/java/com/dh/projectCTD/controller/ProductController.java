@@ -19,46 +19,53 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.dh.projectCTD.dto.ProductDTO;
 import com.dh.projectCTD.exception.ResourceNotFoundException;
+import com.dh.projectCTD.service.ICategoryService;
 import com.dh.projectCTD.service.IProductService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-
-@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/products")
 public class ProductController {
 
     private IProductService productService;
+    private ICategoryService categoryService;
 
     @Autowired
-    public ProductController(IProductService productService) {
+    public ProductController(IProductService productService, ICategoryService categoryService) {
         this.productService = productService;
+        this.categoryService = categoryService;
     }
 
     // Endpoint to add Product
     @PostMapping(consumes = { "multipart/form-data" })
     public ResponseEntity<ProductDTO> save(
             @RequestPart("product") ProductDTO productJson,
-            @RequestPart(value = "files") List<MultipartFile> files)
-    {
+            @RequestPart(value = "files") List<MultipartFile> files) {
         ObjectMapper mapper = new ObjectMapper();
         ProductDTO product = mapper.convertValue(productJson, ProductDTO.class);
 
         ResponseEntity<ProductDTO> response;
 
-        // TODO Evaluar si la categoría existe con isPresent()
-
-        response = ResponseEntity.ok(productService.save(product, files));
+        if (categoryService.findById(product.getCategoryId()).isPresent()) {
+            response = ResponseEntity.ok(productService.save(product, files));
+        } else {
+            response = ResponseEntity.badRequest().build();
+        }
 
         return response;
     }
 
     // Endpoint to update Product
-    @PutMapping(consumes = { "multipart/form-data" })
+    @PutMapping(value = "/{id}", consumes = { "multipart/form-data" })
     public ResponseEntity<ProductDTO> update(
+            @PathVariable Long id,
             @RequestPart("product") ProductDTO product,
-            @RequestPart(value = "files", required = false) List<MultipartFile> newFiles
-    ) throws Exception{
+            @RequestPart(value = "files", required = false) List<MultipartFile> newFiles) throws Exception {
+        
+        if (id != product.getProductId()) {
+            return ResponseEntity.badRequest().build();
+        }
+
         return ResponseEntity.ok(productService.update(product, newFiles));
     }
 
@@ -92,5 +99,11 @@ public class ProductController {
     public ResponseEntity<Boolean> checkName(@RequestParam String name) {
         boolean exists = productService.existsByName(name);
         return ResponseEntity.ok(exists);
+    }
+
+    // Filter by categories
+    @GetMapping("/filter/category")
+    public ResponseEntity<List<ProductDTO>> filterByCategories(@RequestParam List<Long> categoryIds) {
+        return ResponseEntity.ok(productService.findByCategories(categoryIds));
     }
 }

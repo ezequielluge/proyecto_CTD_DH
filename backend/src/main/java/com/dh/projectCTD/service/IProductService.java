@@ -11,7 +11,9 @@ public interface IProductService {
     ProductDTO save(ProductDTO dto, List<MultipartFile> files);
     ProductDTO update(ProductDTO dto, List<MultipartFile> files);
     void deleteById(Long id);
+    
     Optional<ProductDTO> findById(Long id);
     List<ProductDTO> findAll();
     public boolean existsByName(String name);
+    List<ProductDTO> findByCategories(List<Long> categoryIds);
 }

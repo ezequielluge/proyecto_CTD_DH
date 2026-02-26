@@ -5,23 +5,25 @@ import 'react-date-range/dist/theme/default.css';
 import { DatePicker } from 'antd';
 import dayjs from 'dayjs';
 import { useMediaQuery } from 'react-responsive';
+import { useNavigate } from 'react-router-dom';
+
+import Swal from 'sweetalert2';
+
 const { RangePicker } = DatePicker;
 
 const HeroSection = () => {
+    const navigate = useNavigate();
+
     const [destination, setDestination] = useState("");
     const [date, setDate] = useState({
         startDate: null,
         endDate: null
     });
-    const [search, setSearch] = useState({
-        destination: null,
-        date: null
-    })
 
+    // Calendar
     const disabledDate = (current) => {
         return current && current < dayjs().startOf('day');
     }
-
     const handleDateChange = (values, dateStrings) => {
         if (values) {
             setDate({
@@ -33,36 +35,45 @@ const HeroSection = () => {
         }
     }
 
+    // Search handler
     const handleSearch = (e) => {
         e.preventDefault();
 
-        if (destination && date) {
-            setSearch({
-                destination: `${destination}`,
-                startDate: `${date.startDate}`,
-                endDate: `${date.endDate}`
+        // Sweetalert validation
+        if (!destination) {
+            Swal.fire({
+                icon: 'warning',
+                title: '¡Campos incompletos!',
+                text: 'Por favor, ingrese una ciudad.',
+                confirmButtonColor: '#2FBF71',
             });
-            console.log(search);
-        } else {
-            console.error("No data input");
+            return;
         }
 
+        // URL parameters
+        const params = new URLSearchParams();
+        params.append("destination", destination);
+        if (date.startDate) params.append("startDate", date.startDate);
+        if (date.endDate) params.append("endDate", date.endDate);
+        
+        navigate(`/products?${params.toString()}`);
     }
 
     return (
         <section className='w-100 card justify-content-center p-5 pt-3 bg-light bg-opacity-75 shadow'>
             <h2 className='text-center'>Encontrá el destino de tu próximo viaje</h2>
             
-            <div className='d-flex flex-column flex-lg-row justify-content-center gap-2 mt-2'>    
+            <div className='d-flex flex-column flex-lg-row justify-content-center gap-2 mt-2'>
                 {/* Search bar */}
-                <select
-                    className='form-select flex-column btn border-secondary bg-light text-secondary'
-                    value={destination}
-                    onChange={(e) => setDestination(e.target.value)}
-                >
-                    <option value="" disabled>¿A dónde te gustaría ir?</option>
-                    <option value="destino">Destino...</option>
-                </select>
+                <div className="d-flex flex-column w-100 position-relative bg-light">
+                    <input
+                        type="text"
+                        className='form-control py-2 border-secondary'
+                        placeholder='¿A dónde te gustaría ir? (Ej: Buenos Aires, Neuquén...)'
+                        value={destination}
+                        onChange={(e) => setDestination(e.target.value)}
+                    />
+                </div>
 
                 <div className='d-flex flex-column flex-md-row w-100 gap-2 justify-content-center'>
                     { /* Date range picker */}

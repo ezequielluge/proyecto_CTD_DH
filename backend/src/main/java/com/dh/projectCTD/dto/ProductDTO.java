@@ -14,8 +14,11 @@ public class ProductDTO {
     @Getter @Setter
     private Long productId;
 
-    // @Getter @Setter
-    // private Long categoryId;
+    @Getter @Setter
+    private Long categoryId;
+    
+    @Getter @Setter
+    private String categoryName;
 
     @Getter @Setter
     private String name;

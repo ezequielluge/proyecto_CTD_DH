@@ -42,6 +42,15 @@ Algunos de los tests realizados por el back-end en esta fase son:
 
 Todos con el caso de éxito y casos de errores comunes como lo son al no encontrar el ID del producto.
 
+## Sprint 2
+Implementación de correcciones del primer sprint:
+- Validaciones en Backend y DTOs con @Valid y Spring Validator
+- Data seeder para el inicio del proyecto
+- Validación por tipo de archivo en el manejo de imágenes
+
+Del propio sprint se agregó la categorización de productos, los roles de usuarios, 
+las características de productos y la notificación por email de registro exitoso de usuario.
+
 ## Diseño
 La paleta de colores utilizada es:
 - #1E3A5F

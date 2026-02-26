@@ -2,3 +2,4 @@
 export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 export const PRODUCT_ENDPOINT = `${API_URL}/products`;
+export const CATEGORY_ENDPOINT = `${API_URL}/categories`;
