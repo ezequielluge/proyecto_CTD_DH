@@ -29,6 +29,8 @@ public class StorageService implements IStorageService {
     private String storageType;
     @Value("${storage.local.dir}")
     private String localStorageDir;
+    @Value("${storage.web.dir}")
+    private String webStorageDir;
 
     private static final Logger logger = LoggerFactory.getLogger(StorageService.class);
     private S3Client s3Client;
@@ -102,7 +104,7 @@ public class StorageService implements IStorageService {
         }
 
         // Local URL logic
-        return "http://localhost:8080" + localStorageDir + "/" + fileName;
+        return "http://localhost:8080" + webStorageDir + "/" + fileName;
     }
 
     // Delete file from S3 or local storage based on configuration

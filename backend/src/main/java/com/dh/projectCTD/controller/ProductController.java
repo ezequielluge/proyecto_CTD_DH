@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,6 +22,8 @@ import com.dh.projectCTD.service.ICategoryService;
 import com.dh.projectCTD.service.IProductService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/products")
 public class ProductController {
@@ -39,7 +40,7 @@ public class ProductController {
     // Endpoint to add Product
     @PostMapping(consumes = { "multipart/form-data" })
     public ResponseEntity<ProductDTO> save(
-            @RequestPart("product") ProductDTO productJson,
+            @Valid @RequestPart("product") ProductDTO productJson,
             @RequestPart(value = "files") List<MultipartFile> files) {
         ObjectMapper mapper = new ObjectMapper();
         ProductDTO product = mapper.convertValue(productJson, ProductDTO.class);
@@ -59,7 +60,7 @@ public class ProductController {
     @PutMapping(value = "/{id}", consumes = { "multipart/form-data" })
     public ResponseEntity<ProductDTO> update(
             @PathVariable Long id,
-            @RequestPart("product") ProductDTO product,
+            @Valid @RequestPart("product") ProductDTO product,
             @RequestPart(value = "files", required = false) List<MultipartFile> newFiles) throws Exception {
         
         if (id != product.getProductId()) {

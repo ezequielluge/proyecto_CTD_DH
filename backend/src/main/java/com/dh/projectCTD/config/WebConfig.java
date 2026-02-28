@@ -12,11 +12,13 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Value("${storage.local.dir}")
     private String localStorageDir;
+    @Value("${storage.web.dir}")
+    private String webStorageDir;
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         String uploadPath = Paths.get(localStorageDir).toAbsolutePath().toUri().toString();
-        registry.addResourceHandler(localStorageDir + "/**")
+        registry.addResourceHandler(webStorageDir + "/**")
                 .addResourceLocations(uploadPath);
     }
 }

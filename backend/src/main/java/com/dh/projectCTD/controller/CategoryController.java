@@ -14,7 +14,8 @@ import com.dh.projectCTD.dto.CategoryDTO;
 import com.dh.projectCTD.service.ICategoryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
+import jakarta.validation.Valid;
+
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,7 +54,7 @@ public class CategoryController {
     // Create category
     @PostMapping(consumes = { "multipart/form-data" })
     public ResponseEntity<CategoryDTO> save(
-            @RequestPart("category") CategoryDTO categoryJson,
+            @Valid @RequestPart("category") CategoryDTO categoryJson,
             @RequestPart(value = "file", required = false) MultipartFile file) {
         ObjectMapper mapper = new ObjectMapper();
         CategoryDTO category = mapper.convertValue(categoryJson, CategoryDTO.class);
@@ -65,7 +66,7 @@ public class CategoryController {
     @PutMapping(value = "/{id}", consumes = { "multipart/form-data" })
     public ResponseEntity<CategoryDTO> update(
             @PathVariable Long id,
-            @RequestPart("category") CategoryDTO category,
+            @Valid @RequestPart("category") CategoryDTO category,
             @RequestPart(value = "file", required = false) MultipartFile newFile)
         {
             
