@@ -32,6 +32,8 @@ public class StorageService implements IStorageService {
     @Value("${storage.web.dir}")
     private String webStorageDir;
 
+    private static final List<String> ALLOWED_EXTENSIONS = List.of("jpg", "jpeg", "png", "webp");
+
     private static final Logger logger = LoggerFactory.getLogger(StorageService.class);
     private S3Client s3Client;
     @Value("${aws.s3.bucket:none}")
@@ -47,10 +49,12 @@ public class StorageService implements IStorageService {
         if (file == null || file.isEmpty()) {
             throw new BadRequestException("File must not be null or empty");
         }
-        
+
+        validateFile(file);
+
         String fileName = UUID.randomUUID().toString() + "_"
                 + file.getOriginalFilename().replace(" ", "_");
-        
+
         try {
             // S3 upload logic
             if ("s3".equals(storageType)) {
@@ -65,7 +69,8 @@ public class StorageService implements IStorageService {
 
             // Local storage logic
             Path root = Paths.get(localStorageDir);
-            if (!Files.exists(root)) Files.createDirectories(root);
+            if (!Files.exists(root))
+                Files.createDirectories(root);
             Files.copy(file.getInputStream(), root.resolve(fileName));
             return fileName;
 
@@ -135,5 +140,25 @@ public class StorageService implements IStorageService {
             logger.error("Error deleting file from S3: {}", e.getMessage());
         }
 
+    }
+
+    // File extension validation method
+    private void validateFile(MultipartFile file) {
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || !originalFilename.contains(".")) {
+            throw new BadRequestException("El archivo no tiene una extensión válida.");
+        }
+
+        // Extension validation
+        String extension = originalFilename.substring(originalFilename.lastIndexOf(".") + 1).toLowerCase();
+        if (!ALLOWED_EXTENSIONS.contains(extension)) {
+            throw new BadRequestException("Tipo de archivo no permitido. Solo se aceptan: " + ALLOWED_EXTENSIONS);
+        }
+
+        // Mediatype validation (MIME)
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new BadRequestException("El archivo debe ser una imagen.");
+        }
     }
 }
