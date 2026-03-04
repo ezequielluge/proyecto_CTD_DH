@@ -35,6 +35,13 @@ const AdminPage = () => {
                         >Agregar una categoría
                         </NavLink>
                     </button>
+                    <button className='btn btn-secondary'>
+                        <NavLink
+                            className='text-reset text-decoration-none fs-5'
+                            to={`/administracion/users`}
+                        >Usuarios
+                        </NavLink>
+                    </button>
                 </div>
             </section>
         </div>

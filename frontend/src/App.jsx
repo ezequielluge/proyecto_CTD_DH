@@ -12,6 +12,10 @@ import NewCategoryPage from './pages/admin/NewCategoryPage'
 import AdminPageLayout from './components/AdminPageLayout'
 import AdminCategoriesPage from './pages/admin/AdminCategoriesPage'
 import AllProductsPage from './pages/AllProductsPage'
+import LoginPage from './pages/auth/LoginPage'
+import RegisterPage from './pages/auth/RegisterPage'
+import AdminUsersPage from './pages/admin/AdminUsersPage'
+import ProtectedRoute from './components/ProtectedRoute'
 
 function App() {
     return (
@@ -26,6 +30,9 @@ function App() {
                     <Route index element={<ProductPage />} />
                     <Route path='images' element={<ProductGalery />} />
                 </Route>
+
+                <Route path='/register' element={<RegisterPage />} />
+                <Route path='/login' element={<LoginPage />} />
             </Route>
 
             {/* Not found route */}
@@ -33,13 +40,21 @@ function App() {
                 <Route index element={<NotFoundPage />} />
             </Route>
 
-            {/* Admin routes */}
-            <Route path='/administracion' element={<AdminPageLayout />} >
+            {/* Protected Admin routes */}
+            <Route 
+                path='/administracion'
+                element={
+                    <ProtectedRoute>
+                        <AdminPageLayout />
+                    </ProtectedRoute>
+                } 
+            >
                 <Route index element={<AdminPage />} />
                 <Route path='products' element={<AdminProductsPage />} />
                 <Route path='new' element={<NewProductPage />} />
                 <Route path='categories' element={<AdminCategoriesPage />} />
                 <Route path='new-cat' element={<NewCategoryPage />} />
+                <Route path='users' element={<AdminUsersPage />} />
             </Route>
 
             <Route path='/*' element={<Navigate to='/' />} />

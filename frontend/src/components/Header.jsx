@@ -1,11 +1,15 @@
-import React from 'react'
-import { NavLink } from 'react-router-dom'
+import React, { useContext } from 'react'
+import { NavLink, useNavigate } from 'react-router-dom'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBars } from '@fortawesome/free-solid-svg-icons'
+import { AuthContext } from './AuthContext'
 
 
 export const Header = () => {
+    const navigate = useNavigate();
+    const { isAuthenticated, logout } = useContext(AuthContext);
+
     return (
         <header className="navbar sticky-top bg-white w-100">
             <div className="container-fluid">
@@ -23,8 +27,14 @@ export const Header = () => {
 
                 { /* Menu Desktop */}
                 <ul className='nav justify-content-end gap-2 d-none d-md-flex'>
-                    <li><button className='btn btn-primary'>Crear cuenta</button></li>
-                    <li><button className='btn btn-primary'>Iniciar sesión</button></li>
+                    {isAuthenticated 
+                        ? <li><button className='btn btn-primary' onClick={() => logout()}>Cerrar sesión</button></li>
+                        :
+                        <>
+                            <li><button className='btn btn-primary' onClick={() => navigate('/register')}>Crear cuenta</button></li>
+                            <li><button className='btn btn-primary' onClick={() => navigate('/login')}>Iniciar sesión</button></li>
+                        </>
+                    }
                 </ul>
 
                 { /* Menu Mobile */}
@@ -34,7 +44,7 @@ export const Header = () => {
                     data-bs-target="#offcanvasRight"
                     aria-controls='offcanvasRight'
                 > <FontAwesomeIcon icon={faBars} /> </button>
-                
+
                 <div className="offcanvas offcanvas-end" tabIndex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
                     <div className="offcanvas-header">
                         <h5 className="offcanvas-title" id="offcanvasRightLabel">Fast Booking</h5>
@@ -43,10 +53,10 @@ export const Header = () => {
                     <div className="offcanvas-body">
                         <ul className="nav flex-column gap-2">
                             <li className="nav-item">
-                                <button className='btn'>Crear cuenta</button>
+                                <button className='btn' onClick={() => navigate('/register')}>Crear cuenta</button>
                             </li>
                             <li className="nav-item">
-                                <button className='btn'>Iniciar sesión</button>
+                                <button className='btn' onClick={() => navigate('/login')}>Iniciar sesión</button>
                             </li>
                         </ul>
                     </div>
