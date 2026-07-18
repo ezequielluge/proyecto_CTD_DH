@@ -27,5 +27,10 @@ public class GlobalException {
         response.put("error", exception.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
+
+    @ExceptionHandler(FeatureAlreadyExistsException.class)
+    public ResponseEntity<String> processFeatureAlreadyExistsException(FeatureAlreadyExistsException exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(exception.getMessage());
+    }
     
 }

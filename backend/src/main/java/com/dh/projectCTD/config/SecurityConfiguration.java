@@ -42,12 +42,25 @@ public class SecurityConfiguration {
                                 HttpMethod.GET,
                                 "/products/**",
                                 "/categories/**",
-                                "/api/images/**")
+                                "/api/images/**",
+                                "/feature/**")
                         .permitAll()
                         // RBAC Configuration
-                        .requestMatchers(HttpMethod.POST, "/products/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/products/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/products/**").hasRole("ADMIN")
+                        .requestMatchers(
+                            HttpMethod.POST,
+                            "/products/**",
+                            "/feature/**"
+                        ).hasRole("ADMIN")
+                        .requestMatchers(
+                            HttpMethod.PUT,
+                            "/products/**",
+                            "/feature/**"
+                        ).hasRole("ADMIN")
+                        .requestMatchers(
+                            HttpMethod.DELETE,
+                            "/products/**",
+                            "/feature/**"
+                        ).hasRole("ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/user/**").hasRole("ADMIN")
                         // Others
