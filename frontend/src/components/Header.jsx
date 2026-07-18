@@ -4,11 +4,18 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBars } from '@fortawesome/free-solid-svg-icons'
 import { AuthContext } from './AuthContext'
+import UserAvatar from './user/UserAvatar'
 
+import { ROUTES } from '../config/paths'
+import { ROLES } from '../config/roles'
 
 export const Header = () => {
     const navigate = useNavigate();
-    const { isAuthenticated, logout } = useContext(AuthContext);
+    const { user, isAuthenticated, logout } = useContext(AuthContext);
+    const handleLogout = () => {
+        logout();
+        navigate(ROUTES.HOME);
+    }
 
     return (
         <header className="navbar sticky-top bg-white w-100">
@@ -27,12 +34,24 @@ export const Header = () => {
 
                 { /* Menu Desktop */}
                 <ul className='nav justify-content-end gap-2 d-none d-md-flex'>
-                    {isAuthenticated 
-                        ? <li><button className='btn btn-primary' onClick={() => logout()}>Cerrar sesión</button></li>
-                        :
+                    {isAuthenticated ? (
                         <>
-                            <li><button className='btn btn-primary' onClick={() => navigate('/register')}>Crear cuenta</button></li>
-                            <li><button className='btn btn-primary' onClick={() => navigate('/login')}>Iniciar sesión</button></li>
+                            <NavLink
+                                className='d-flex flex-row align-items-center gap-2 text-reset text-decoration-none'
+                                to={ROUTES.PROFILE}
+                            >
+                                <span className='fw-bold'>¡Hola {user.firstname}!</span>
+                                <UserAvatar firstname={user.firstname} lastname={user.lastname} />
+                            </NavLink>
+                            {user.role === ROLES.ADMIN && (
+                                <li><button className='btn btn-primary h-100' onClick={() => navigate(ROUTES.ADMIN.ROOT)}>Panel Admin</button></li>
+                            )}
+                            <li><button className='btn btn-primary h-100' onClick={() => handleLogout()}>Cerrar sesión</button></li>
+                        </>
+                    ) :
+                        <>
+                            <li><button className='btn btn-primary h-100' onClick={() => navigate(ROUTES.REGISTER)}>Crear cuenta</button></li>
+                            <li><button className='btn btn-primary h-100' onClick={() => navigate(ROUTES.LOGIN)}>Iniciar sesión</button></li>
                         </>
                     }
                 </ul>
@@ -52,12 +71,28 @@ export const Header = () => {
                     </div>
                     <div className="offcanvas-body">
                         <ul className="nav flex-column gap-2">
-                            <li className="nav-item">
-                                <button className='btn' onClick={() => navigate('/register')}>Crear cuenta</button>
-                            </li>
-                            <li className="nav-item">
-                                <button className='btn' onClick={() => navigate('/login')}>Iniciar sesión</button>
-                            </li>
+                            {isAuthenticated ? (
+                                <>
+                                    <>
+                                        <li className="nav-item fw-bold text-center">¡Hola {user.firstName}!</li>
+                                        <li><button className='btn btn-light w-100' onClick={() => navigate(ROUTES.PROFILE)} data-bs-dismiss="offcanvas">Mi Perfil</button></li>
+                                        {user.role === ROLES.ADMIN && (
+                                            <li><button className='btn btn-light w-100' onClick={() => navigate(ROUTES.ADMIN.ROOT)} data-bs-dismiss="offcanvas">Administración</button></li>
+                                        )}
+                                        <hr />
+                                        <li><button className='btn btn-danger w-100' onClick={() => handleLogout()} data-bs-dismiss="offcanvas">Cerrar sesión</button></li>
+                                    </>
+                                </>
+                            ) : (
+                                <>
+                                    <li className="nav-item">
+                                        <button className='btn' onClick={() => navigate(ROUTES.REGISTER)}>Crear cuenta</button>
+                                    </li>
+                                    <li className="nav-item">
+                                        <button className='btn' onClick={() => navigate(ROUTES.LOGIN)}>Iniciar sesión</button>
+                                    </li>
+                                </>
+                            )}
                         </ul>
                     </div>
                 </div>

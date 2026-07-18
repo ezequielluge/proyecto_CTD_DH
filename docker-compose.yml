@@ -4,9 +4,6 @@ services:
     container_name: project-backend
     ports:
       - "8080:8080"
-    volumes:
-      - ./backend_data:/data       # H2 
-      - ./backend_uploads:/uploads # Images
     environment:
       - SPRING_PROFILES_ACTIVE=dev
 

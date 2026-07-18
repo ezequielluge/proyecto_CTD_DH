@@ -56,7 +56,6 @@ const AllProductsPage = () => {
         }
 
         const ids = selectedCategories.join(',');
-        console.log(ids);
         const res = await fetch(`${PRODUCT_ENDPOINT}/filter/category?categoryIds=${ids}`);
         const data = await res.json();
         setProducts(data);

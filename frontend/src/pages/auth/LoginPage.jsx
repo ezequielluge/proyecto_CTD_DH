@@ -8,7 +8,7 @@ const LoginPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const { login, isAuthenticated } = useContext(AuthContext);
+    const { user, login, isAuthenticated } = useContext(AuthContext);
     const from = location.state?.from?.pathname || "/";
 
     const [error, setError] = useState('');
@@ -48,11 +48,11 @@ const LoginPage = () => {
             }
 
             // Saving token into local storage
-            const data = await res.json();
-            login(data.token);
+            const userData = await res.json();
+            login(userData);
             
             Swal.fire({
-                title: '¡Bienvenido!',
+                title: `¡Bienvenido ${userData?.firstname || ''}!`,
                 text: 'Sesión iniciada con éxito.',
                 icon: 'success',
                 confirmButtonText: 'Cerrar',

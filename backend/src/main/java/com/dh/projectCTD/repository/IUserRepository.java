@@ -10,4 +10,5 @@ import com.dh.projectCTD.model.User;
 @Repository
 public interface IUserRepository extends JpaRepository<User, Long>{
     Optional<User> findByEmail(String email);
+    boolean existsByEmail(String mail);
 }

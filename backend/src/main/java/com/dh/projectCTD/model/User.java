@@ -44,6 +44,10 @@ public class User implements UserDetails {
         return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
+    public Long getId() {
+        return id;
+    }
+
     @Override
     public String getUsername() {
         return email;
@@ -73,9 +77,5 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
-
-    
-    
-
     
 }

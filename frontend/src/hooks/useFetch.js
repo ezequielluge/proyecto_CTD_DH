@@ -1,43 +1,37 @@
 import { useEffect, useState } from "react";
+import { api } from "../services/api";
 
 export const useFetch = (url) => {
-
-    const [state, setState] = useState({
-        data: null,
-        isLoading: true,
-        error: null
-    });
-
-    const { data, isLoading, error } = state;
-
-    const getFetch = async () => {
-        if (!url) return;
-
-        try {
-            const res = await fetch(url);
-            const data = await res.json();
-            setState({
-                data: data,
-                isLoading: false,
-                error: null
-            });
-        } catch (error) {
-            setState({
-                data: null,
-                isLoading: false,
-                error: error
-            })
-        }
-    };
-
+    const [data, setData] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+    
     useEffect(() => {
-        getFetch();
+        const fetchData = async () => {
+            if (!url) return;
+    
+            try {
+                const res = await api(url);
+
+                if (!res || !res.ok)
+                    throw new Error("Error al obtener los datos");
+
+                const data = await res.json();
+                setData(data);
+            } catch (error) {
+                setError(error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchData();
     }, [url])
 
     return {
         data,
         isLoading,
-        error
+        error,
+        setData
     }
 
 }

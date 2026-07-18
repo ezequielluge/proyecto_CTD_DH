@@ -10,8 +10,8 @@ const RegisterPage = () => {
     const { isAuthenticated } = useContext(AuthContext);
 
     const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
+        firstname: '',
+        lastname: '',
         email: '',
         emailRep: '',
         password: '',
@@ -31,15 +31,25 @@ const RegisterPage = () => {
         e.preventDefault();
         setError('');
 
-        console.log(formData);
+        const emailRegexValidation = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
         // Validations
+        // Empty fields validation
         if (Object.values(formData).some(field => field === '')) {
             setError('¡Por favor rellene todos los campos!');
             return;
         }
-        if (formData.email != formData.emailRep) {
+        // Email validation
+        if (!emailRegexValidation.test(formData.email)) {
+            setError('El correo electrónico ingresado no es válido.');
+            return;
+        } else if (formData.email != formData.emailRep) {
             setError('¡Los correos electrónicos no coinciden!');
+            return;
+        }
+        // Password validation
+        if (formData.password.length < 8) {
+            setError('La contraseña debe tener al menos 8 caracteres.');
             return;
         }
         if (formData.password != formData.passwordRep) {
@@ -53,19 +63,20 @@ const RegisterPage = () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    firstName: formData.firstName,
-                    lastName: formData.lastName,
+                    firstname: formData.firstname,
+                    lastname: formData.lastname,
                     email: formData.email,
                     password: formData.password,
                 })
             })
 
             if (res.status == 409) {
-                setError('¡El correo eléctronico ya está en uso!');
-                return
+                const errorData = await res.json();
+                setError(errorData.error);
+                return;
             } else if (!res.ok) {
                 setError('Error en el registro, intente nuevamente más tarde.');
-                return
+                return;
             }
 
             Swal.fire({
@@ -100,12 +111,12 @@ const RegisterPage = () => {
                 onSubmit={handleSubmit}
             >
                 <div className="mb-3">
-                    <label htmlFor="inputFirstName" className="form-label">Nombre</label>
-                    <input type="text" name='firstName' className="form-control" id="inputFirstName" onChange={handleChange} />
+                    <label htmlFor="inputFirstname" className="form-label">Nombre</label>
+                    <input type="text" name='firstname' className="form-control" id="inputFirstname" onChange={handleChange} />
                 </div>
                 <div className="mb-3">
-                    <label htmlFor="inputLastName" className="form-label">Apellido</label>
-                    <input type="text" name='lastName' className="form-control" id="inputLastName" onChange={handleChange} />
+                    <label htmlFor="inputLastname" className="form-label">Apellido</label>
+                    <input type="text" name='lastname' className="form-control" id="inputLastname" onChange={handleChange} />
                 </div>
                 <div className="mb-3">
                     <label htmlFor="inputEmail" className="form-label">Correo electrónico</label>
