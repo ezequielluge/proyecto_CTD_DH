@@ -29,8 +29,6 @@ const ProductCard = ({ product }) => {
                         <div className="card-body d-flex flex-column h-100">
                             <div className="d-flex justify-content-between">
                                 <h5 className="card-title text-truncate">{name}</h5>
-                                {/* TODO Implementar rating */}
-                                {/* <span className="badge bg-info text-dark">Rating: {rating}</span> */}
                             </div>
 
                             <p className="card-text text-muted mb-1">
@@ -40,8 +38,6 @@ const ProductCard = ({ product }) => {
                             <p className="card-text text-truncate productCard-description">
                                 {description}
                             </p>
-
-                            {/* TODO Implementar servicios */}
 
                             <div className="mt-auto pt-3 d-flex justify-content-end">
                                 <NavLink
