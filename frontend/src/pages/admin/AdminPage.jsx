@@ -48,7 +48,7 @@ const AdminPage = () => {
                         <NavLink
                             className='text-reset text-decoration-none fs-5'
                             to={ROUTES.ADMIN.FEATURES}
-                        >Administrar caracteristicas
+                        >Administrar características
                         </NavLink>
                     </button>
                 </div>

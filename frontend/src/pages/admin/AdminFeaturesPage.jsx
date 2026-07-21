@@ -117,15 +117,13 @@ const AdminFeaturesPage = () => {
         });
     }
 
-    const handleUpdate = (id) => {
-        const feature = features.find(f => f.id === id);
-
-        MySwal.fire({
-            title: <span className="fw-bold mt-2">Editar Característica</span>,
+    const featureSwalAlert = ({ title, initialName = '', initialIcon = '', confirmButtonText }) => {
+        return MySwal.fire({
+            title: <span className="fw-bold mt-2">{title}</span>,
             width: '700px',
-            html: <FeatureFormContent initialName={feature.name} initialIcon={feature.icon} />,
+            html: <FeatureFormContent initialName={initialName} initialIcon={initialIcon} />,
             showCancelButton: true,
-            confirmButtonText: 'Guardar cambios',
+            confirmButtonText: confirmButtonText,
             cancelButtonText: 'Cancelar',
             buttonsStyling: false,
             customClass: {
@@ -142,17 +140,27 @@ const AdminFeaturesPage = () => {
                 }
 
                 return {
-                    id,
                     name,
                     iconValue
                 }
             }
+        });
+    }
+
+    const handleUpdate = (id) => {
+        const feature = features.find(f => f.id === id);
+
+        featureSwalAlert({
+            title: 'Editar Característica',
+            initialName: feature.name,
+            initialIcon: feature.icon,
+            confirmButtonText: 'Guardar cambios'
         }).then(async (result) => {
             if (result.isConfirmed) {
                 const payload = {
+                    id: id,
                     name: result.value.name,
                     icon: result.value.iconValue
-
                 };
 
                 try {
@@ -182,12 +190,55 @@ const AdminFeaturesPage = () => {
                     console.error(error);
                     Swal.fire(
                         'Error',
-                        'Ha ocurrido un error al intentar modificar la característica.',
+                        error,
                         'error'
                     );
                 }
             }
         })
+    }
+
+    const handleCreate = () => {
+        featureSwalAlert({
+            title: 'Nueva característica',
+            confirmButtonText: 'Crear'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                const payload = {
+                    name: result.value.name,
+                    icon: result.value.iconValue
+                };
+
+                try {
+                    const res = await api(`${url}`, {
+                        method: 'POST',
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (res.ok) {
+                        const newFeature = await res.json();
+
+                        setFeatures(prev => [...prev, newFeature]);
+
+                        Swal.fire(
+                            'Creada!',
+                            'Característica creada con éxito.',
+                            'success'
+                        );
+                    } else {
+                        throw new Error('Ha ocurrido un error al intentar agregar la caracteristica');
+                    }
+
+                } catch (error) {
+                    console.error(error);
+                    Swal.fire(
+                        'Error',
+                        error,
+                        'error'
+                    );
+                }
+            }
+        });
     }
 
     return (
@@ -199,41 +250,51 @@ const AdminFeaturesPage = () => {
                         ? <p>Cargando características...</p>
                         : error ? <p>Ha ocurrido un error al cargar las características.</p>
                             : data.length == 0 ? <p>No hay caracteristicas existentes, por favor agregue una nueva.</p>
-                                : <table className='table table-light table-striped border'>
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Nombre</th>
-                                            <th>Icono</th>
-                                            <th>Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {features.map(feature => (
-                                            <tr key={feature.id}>
-                                                <td>{feature.id}</td>
-                                                <td>{feature.name}</td>
-                                                <td>
-                                                    <FontAwesomeIcon icon={feature.icon} className="me-2" />
-                                                    <span>{feature.icon}</span>
-                                                </td>
-                                                <td>
-                                                    <div className="d-flex">
-                                                        <button
-                                                            className="btn"
-                                                            onClick={() => handleUpdate(feature.id)}
-                                                        >✏️</button>
-                                                        <button
-                                                            className="btn"
-                                                            onClick={() => handleRemove(feature.id)}
-                                                        >❌</button>
-                                                    </div>
-                                                </td>
+                                :
+                                <div className='col'>
+                                    <section className='d-flex justify-content-end mb-3'>
+                                        <button
+                                            onClick={() => handleCreate()}
+                                            className="btn btn-primary"
+                                        >Añadir nueva
+                                        </button>
+                                    </section>
+                                    <table className='table table-light table-striped border'>
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Nombre</th>
+                                                <th>Icono</th>
+                                                <th>Acciones</th>
                                             </tr>
-                                        ))
-                                        }
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                            {features.map(feature => (
+                                                <tr key={feature.id}>
+                                                    <td>{feature.id}</td>
+                                                    <td>{feature.name}</td>
+                                                    <td>
+                                                        <FontAwesomeIcon icon={feature.icon} className="me-2" />
+                                                        <span>{feature.icon}</span>
+                                                    </td>
+                                                    <td>
+                                                        <div className="d-flex">
+                                                            <button
+                                                                className="btn"
+                                                                onClick={() => handleUpdate(feature.id)}
+                                                            >✏️</button>
+                                                            <button
+                                                                className="btn"
+                                                                onClick={() => handleRemove(feature.id)}
+                                                            >❌</button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
                     }
                 </section>
             </div>
