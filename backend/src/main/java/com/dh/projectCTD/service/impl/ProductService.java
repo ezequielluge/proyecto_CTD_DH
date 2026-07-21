@@ -88,13 +88,18 @@ public class ProductService implements IProductService {
         Product productEntity = productRepository.findById(dto.getProductId())
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found. Id: " + dto.getProductId()));
 
+        Category prevCategory = productEntity.getCategory();
         Category categoryEntity = new Category();
         categoryEntity.setId(dto.getCategoryId());
+
+        if (categoryEntity.getId() != prevCategory.getId()) {
+            categoryService.decrementProductsCount(prevCategory.getId());
+            categoryService.incrementProductsCount(categoryEntity.getId());
+        }
 
         List<Long> featuresIds = dto.getFeaturesIds().stream().map(Number::longValue).collect(Collectors.toList());
         Set<Feature> features = featureService.getAllFeaturesByIds(featuresIds);
         System.out.println(dto.getFeaturesIds());
-        System.out.println("Features encontrados: " + features.size());
 
         // User URLs from DTO
         List<String> dtoUrls = dto.getImages() != null ? dto.getImages() : new ArrayList<>();
@@ -128,7 +133,6 @@ public class ProductService implements IProductService {
         productEntity.setAddress(dto.getAddress());
         productEntity.setCity(dto.getCity());
         productEntity.setCategory(categoryEntity);
-        // Features clear manytomany old relations & update with new features relation
         productEntity.getFeatures().clear();
         productEntity.getFeatures().addAll(features);
 

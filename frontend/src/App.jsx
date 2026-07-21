@@ -21,6 +21,7 @@ import ProfilePage from './pages/ProfilePage'
 import { ROUTES } from './config/paths'
 import { ROLES } from './config/roles'
 import UnauthorizedPage from './pages/UnauthorizedPage'
+import AdminFeaturesPage from './pages/admin/AdminFeaturesPage'
 
 function App() {
     return (
@@ -75,11 +76,12 @@ function App() {
                 }
             >
                 <Route index element={<AdminPage />} />
-                <Route path='products' element={<AdminProductsPage />} />
-                <Route path='new' element={<NewProductPage />} />
-                <Route path='categories' element={<AdminCategoriesPage />} />
-                <Route path='new-cat' element={<NewCategoryPage />} />
-                <Route path='users' element={<AdminUsersPage />} />
+                <Route path={ROUTES.ADMIN.PRODUCTS} element={<AdminProductsPage />} />
+                <Route path={ROUTES.ADMIN.NEW_PRODUCT} element={<NewProductPage />} />
+                <Route path={ROUTES.ADMIN.CATEGORIES} element={<AdminCategoriesPage />} />
+                <Route path={ROUTES.ADMIN.NEW_CATEGORY} element={<NewCategoryPage />} />
+                <Route path={ROUTES.ADMIN.USERS} element={<AdminUsersPage />} />
+                <Route path={ROUTES.ADMIN.FEATURES} element={<AdminFeaturesPage />} />
             </Route>
 
             <Route path='/*' element={<Navigate to='/' />} />

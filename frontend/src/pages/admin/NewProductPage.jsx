@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { CATEGORY_ENDPOINT, PRODUCT_ENDPOINT } from '../../config/config';
 import { useFetch } from '../../hooks/useFetch';
+import { api } from '../../services/api';
+
+import AdminPanelHeader from '../../components/admin/AdminPanelHeader';
 
 const NewProductPage = () => {
     const navigate = useNavigate();
@@ -103,10 +106,10 @@ const NewProductPage = () => {
         });
 
         try {
-            const res = await fetch(url, {
+            const res = await api(url, {
                 method: 'POST',
                 body: formData
-            });
+            }, true);
 
             if (res.ok) {
                 const data = await res.json();
@@ -131,15 +134,7 @@ const NewProductPage = () => {
     return (
         <>
             <section className='m-3'>
-                <div className='d-flex justify-content-between align-items-center mb-4'>
-                    <h4 className='mb-0'>Nuevo producto:</h4>
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="btn btn-outline-secondary"
-                    >← Volver
-                    </button>
-                </div>
-
+                <AdminPanelHeader title="Nuevo producto:" previousRoute={-1} />
                 <form
                     className="row g-3 mt-2"
                     onSubmit={handleSubmit}

@@ -1,5 +1,6 @@
 
 import Swal from "sweetalert2";
+import { api } from "../services/api";
 
 export const useDeleteWithAlert = () => {
     const confirmDelete = async ({ url, id, title, onSuccess }) => {
@@ -16,7 +17,7 @@ export const useDeleteWithAlert = () => {
 
         if (result.isConfirmed) {
             try {
-                const res = await fetch(
+                const res = await api(
                     `${url}/${id}`,
                     { method: 'DELETE' }
                 );

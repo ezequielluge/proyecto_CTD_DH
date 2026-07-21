@@ -49,16 +49,19 @@ public class SecurityConfiguration {
                         .requestMatchers(
                             HttpMethod.POST,
                             "/products/**",
+                            "/categories/**",
                             "/feature/**"
                         ).hasRole("ADMIN")
                         .requestMatchers(
                             HttpMethod.PUT,
                             "/products/**",
+                            "/categories/**",
                             "/feature/**"
                         ).hasRole("ADMIN")
                         .requestMatchers(
                             HttpMethod.DELETE,
                             "/products/**",
+                            "/categories/**",
                             "/feature/**"
                         ).hasRole("ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")

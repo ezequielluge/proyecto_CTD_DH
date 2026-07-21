@@ -2,15 +2,17 @@ import { useEffect, useState } from 'react'
 import { useFetch } from '../../hooks/useFetch';
 import { useDeleteWithAlert } from '../../hooks/useDeleteWithAlert';
 import { useNavigate } from 'react-router-dom';
-import { CATEGORY_ENDPOINT } from '../../config/config';
+import { CATEGORY_ENDPOINT, PRODUCT_ENDPOINT } from '../../config/config';
 import Swal from 'sweetalert2';
+import AdminPanelHeader from '../../components/admin/AdminPanelHeader';
+import { api } from '../../services/api';
 
 const AdminCategoriesPage = () => {
-    const navigate = useNavigate();
     const [categories, setCategories] = useState([]);
 
     const url = CATEGORY_ENDPOINT;
     const { data, isLoading, error } = useFetch(url);
+    const { data: productsData } = useFetch(PRODUCT_ENDPOINT);
 
     const { confirmDelete } = useDeleteWithAlert();
 
@@ -21,6 +23,31 @@ const AdminCategoriesPage = () => {
     }, [data]);
 
     const handleRemove = (id) => {
+        const productsUsingCategory = productsData?.filter(product =>
+            product.categoryId == id
+        ) || [];
+
+        if (productsUsingCategory.length > 0) {
+            const productsListHTML = productsUsingCategory.map(p =>
+                `<li><strong>ID ${p.productId}:</strong> ${p.name}</li>`
+            ).join('');
+
+            Swal.fire({
+                icon: 'error',
+                title: 'No se puede eliminar',
+                html: `
+                            <div class="text-start">
+                                <p>Esta categoría está siendo utilizada por los siguientes productos:</p>
+                                <ul class="text-danger mb-3">
+                                    ${productsListHTML}
+                                </ul>
+                            </div>
+                        `,
+                confirmButtonText: 'Entendido'
+            });
+            return;
+        }
+
         confirmDelete({
             url: url,
             id: id,
@@ -87,7 +114,7 @@ const AdminCategoriesPage = () => {
                     );
                     formData.append('category', categoryBlob);
 
-                    const response = await fetch(`${url}/${categoryId}`, {
+                    const response = await api(`${url}/${categoryId}`, {
                         method: 'PUT',
                         body: formData
                     });
@@ -117,14 +144,7 @@ const AdminCategoriesPage = () => {
     return (
         <>
             <div className='m-3'>
-                <div className='d-flex justify-content-between align-items-center mb-4'>
-                    <h4 className='mb-0'>Listado de categorias:</h4>
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="btn btn-outline-secondary"
-                    >← Volver
-                    </button>
-                </div>
+                <AdminPanelHeader title="Listado de categorias:" previousRoute={-1} />
                 <div className='w-100 mt-3'>
                     {isLoading ?
                         <p>Cargando...</p>

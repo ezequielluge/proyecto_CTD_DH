@@ -1,18 +1,27 @@
 import { useEffect, useState } from 'react'
 import { useFetch } from '../../hooks/useFetch.js';
-import Swal from 'sweetalert2';
-import { CATEGORY_ENDPOINT, PRODUCT_ENDPOINT } from '../../config/config.js';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content'
+
+import { CATEGORY_ENDPOINT, FEATURES_ENDPOINT, PRODUCT_ENDPOINT } from '../../config/config.js';
 import { useDeleteWithAlert } from '../../hooks/useDeleteWithAlert.js';
+import { api } from '../../services/api.js';
+import FeatureSelector from '../../components/admin/FeatureSelector.jsx';
+
+import AdminPanelHeader from '../../components/admin/AdminPanelHeader.jsx'
 
 const AdminProductsPage = () => {
-    const [products, setProducts] = useState([]);
+    const MySwal = withReactContent(Swal);
     const navigate = useNavigate();
-
+    
+    const [products, setProducts] = useState([]);
+    
     const url = PRODUCT_ENDPOINT;
     const { confirmDelete } = useDeleteWithAlert();
-
     const { data, isLoading, error } = useFetch(url);
+    const { data: categoriesData } = useFetch(CATEGORY_ENDPOINT);
+    const { data: featuresData } = useFetch(FEATURES_ENDPOINT);
 
     useEffect(() => {
         if (data && !isLoading) {
@@ -42,41 +51,51 @@ const AdminProductsPage = () => {
         </option>`
         ).join('');
 
-        Swal.fire({
-            title: '<h4 class="fw-bold mt-2">Editar Producto</h4>',
+        MySwal.fire({
+            title: <span className="fw-bold mt-2">Editar Producto</span>,
             width: '700px',
-            html: `
-            <form id="edit-form" class="text-start px-3 container-fluid">
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label small fw-bold">Nombre</label>
-                        <input type="text" id="swal-name" class="form-control" value="${product.name || ''}">
+            html: (
+                <form id="edit-form" className="text-start px-3 container-fluid">
+                    <div className="row">
+                        <div className="col-md-6 mb-3">
+                            <label className="form-label small fw-bold">Nombre</label>
+                            <input type="text" id="swal-name" className="form-control" defaultValue={product.name || ''} />
+                        </div>
+                        <div className="col-md-6 mb-3">
+                            <label className="form-label small fw-bold">Categoría</label>
+                            <select id="swal-category" className="form-select" defaultValue={product.categoryId}>
+                                {categoriesData.map(cat => (
+                                    <option key={cat.categoryId} value={cat.categoryId}>
+                                        {cat.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label small fw-bold">Categoría</label>
-                        <select id="swal-category" class="form-select">
-                            ${categoryOptions}
-                        </select>
-                    </div>
-                </div>
 
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">Descripción</label>
-                    <textarea id="swal-description" class="form-control" rows="3">${product.description || ''}</textarea>
-                </div>
+                    <div className="mb-3">
+                        <label className="form-label small fw-bold">Descripción</label>
+                        <textarea id="swal-description" className="form-control" rows="3" defaultValue={product.description || ''} />
+                    </div>
 
-                <div class="row">
-                    <div class="col-md-8 mb-3">
-                        <label class="form-label small fw-bold">Dirección</label>
-                        <input type="text" id="swal-address" class="form-control" value="${product.address || ''}">
+                    <div className="row">
+                        <div className="col-md-8 mb-3">
+                            <label className="form-label small fw-bold">Dirección</label>
+                            <input type="text" id="swal-address" className="form-control" defaultValue={product.address || ''} />
+                        </div>
+                        <div className="col-md-4 mb-3">
+                            <label className="form-label small fw-bold">Ciudad</label>
+                            <input type="text" id="swal-city" className="form-control" defaultValue={product.city || ''} />
+                        </div>
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label small fw-bold">Ciudad</label>
-                        <input type="text" id="swal-city" class="form-control" value="${product.city || ''}">
-                    </div>
-                </div>
-            </form>
-        `,
+
+                    {/* 5. AQUI INSERTAMOS NUESTRO COMPONENTE MODULAR */}
+                    <FeatureSelector
+                        featuresData={featuresData}
+                        initialSelectedIds={product.featuresIds || []}
+                    />
+                </form>
+            ),
             showCancelButton: true,
             confirmButtonText: 'Guardar cambios',
             cancelButtonText: 'Cancelar',
@@ -91,7 +110,10 @@ const AdminProductsPage = () => {
                 const description = document.getElementById('swal-description').value;
                 const address = document.getElementById('swal-address').value;
                 const city = document.getElementById('swal-city').value;
-                const images = products.images;
+                const images = product.images;
+
+                const checkedNodes = document.querySelectorAll('.feature-checkbox:checked');
+                const featuresIds = Array.from(checkedNodes).map(node => parseInt(node.value));
 
                 if (!name || !description || !address || !city) {
                     Swal.showValidationMessage('No deje campos en blanco.');
@@ -105,7 +127,8 @@ const AdminProductsPage = () => {
                     description,
                     address,
                     city,
-                    images
+                    images,
+                    featuresIds
                 };
             }
         }).then(async (result) => {
@@ -118,10 +141,10 @@ const AdminProductsPage = () => {
                     );
                     formData.append('product', productBlob);
 
-                    const response = await fetch(`${url}/${productId}`, {
+                    const response = await api(`${url}/${productId}`, {
                         method: 'PUT',
                         body: formData
-                    });
+                    }, true);
 
                     if (response.ok) {
                         const updatedProduct = await response.json();
@@ -137,8 +160,11 @@ const AdminProductsPage = () => {
                             timer: 2000,
                             showConfirmButton: false
                         });
+                    } else {
+                        throw new Error(response.body);
                     }
                 } catch (error) {
+                    console.error(error);
                     Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
                 }
             }
@@ -148,14 +174,7 @@ const AdminProductsPage = () => {
     return (
         <>
             <div className='m-3'>
-                <div className='d-flex justify-content-between align-items-center mb-4'>
-                    <h4 className='mb-0'>Listado de productos:</h4>
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="btn btn-outline-secondary"
-                    >← Volver
-                    </button>
-                </div>
+                <AdminPanelHeader title="Listado de productos:" previousRoute={-1} />
                 <div className='w-100 mt-3'>
                     {isLoading
                         ? <p>Cargando productos...</p>
@@ -164,39 +183,42 @@ const AdminProductsPage = () => {
                             : products?.length == 0
                                 ? <p>No existen productos.</p>
                                 :
-                                <table className='table table-light table-striped border'>
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Nombre</th>
-                                            <th>Categoría</th>
-                                            <th>Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {
-                                            products.map(product => (
-                                                <tr key={product.productId}>
-                                                    <td>{product.productId}</td>
-                                                    <td>{product.name}</td>
-                                                    <td>{product.categoryName}</td>
-                                                    <td>
-                                                        <div className="d-flex">
-                                                            <button
-                                                                className="btn"
-                                                                onClick={() => handleUpdate(product.productId)}
-                                                            >✏️</button>
-                                                            <button
-                                                                className="btn"
-                                                                onClick={() => handleRemove(product.productId)}
-                                                            >❌</button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        }
-                                    </tbody>
-                                </table>
+                                <div>
+                                    <h5>Total de productos: {products.length}</h5>
+                                    <table className='table table-light table-striped border'>
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Nombre</th>
+                                                <th>Categoría</th>
+                                                <th>Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {
+                                                products.map(product => (
+                                                    <tr key={product.productId}>
+                                                        <td>{product.productId}</td>
+                                                        <td>{product.name}</td>
+                                                        <td>{product.categoryName}</td>
+                                                        <td>
+                                                            <div className="d-flex">
+                                                                <button
+                                                                    className="btn"
+                                                                    onClick={() => handleUpdate(product.productId)}
+                                                                >✏️</button>
+                                                                <button
+                                                                    className="btn"
+                                                                    onClick={() => handleRemove(product.productId)}
+                                                                >❌</button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
                     }
                 </div>
             </div>

@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.dh.projectCTD.dto.FeatureDTO;
+import com.dh.projectCTD.exception.BadRequestException;
 import com.dh.projectCTD.exception.FeatureAlreadyExistsException;
 import com.dh.projectCTD.exception.ResourceNotFoundException;
 import com.dh.projectCTD.model.Feature;
@@ -63,6 +64,8 @@ public class FeatureService implements IFeatureService {
     public void delete(Long id) {
         if (!featureRepository.existsById(id))
             throw new ResourceNotFoundException("No feature found with id " + id);
+        if (featureRepository.countAssociatedProducts(id) > 0)
+            throw new BadRequestException("Cannot delete a feature with associated products. Feature id: " + id);
 
         featureRepository.deleteById(id);
     }

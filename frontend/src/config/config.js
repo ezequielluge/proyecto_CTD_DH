@@ -10,3 +10,5 @@ export const LOGIN_ENDPOINT = `${AUTH_ENDPOINT}/login`;
 export const TOKEN_VALIDATION_ENDPOINT = `${AUTH_ENDPOINT}/validate`;
 
 export const USER_ENDPOINT = `${API_URL}/user`;
+
+export const FEATURES_ENDPOINT = `${API_URL}/feature`;

@@ -1,21 +1,24 @@
 import React from 'react'
 
-export const api = async (endpoint, options = {}) => {
+export const api = async (endpoint, options = {}, isFormData = false) => {
     const token = localStorage.getItem('token');
 
-    const headers = {
-        'Content-Type': 'application/json',
-        ...options.headers
-    };
+    const headers = {...options.headers};
 
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-    
+    if (!isFormData) headers['Content-Type'] = 'application/json';
+
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
     const response = await fetch(`${endpoint}`, {
         ...options,
         headers
     });
+
+    // 400 Bad request
+    if (response.status === 400) {
+        console.error(response.body);
+        return;
+    }
 
     // 401 Token expired
     if (response.status === 401) {
@@ -26,7 +29,7 @@ export const api = async (endpoint, options = {}) => {
 
     // 403 Unauthorized
     if (response.status === 403) {
-        // window.location.href = '/unauthorized';
+        window.location.href = '/unauthorized';
         return null;
     }
 

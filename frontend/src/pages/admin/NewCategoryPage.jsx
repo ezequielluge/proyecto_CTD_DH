@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { CATEGORY_ENDPOINT } from '../../config/config';
+import { api } from '../../services/api';
 
 const NewCategoryPage = () => {
     const navigate = useNavigate();
@@ -62,7 +63,7 @@ const NewCategoryPage = () => {
         formData.append('file', file);
 
         try {
-            const res = await fetch(url, {
+            const res = await api(url, {
                 method: 'POST',
                 body: formData
             });

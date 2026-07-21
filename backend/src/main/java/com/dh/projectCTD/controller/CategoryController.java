@@ -58,7 +58,7 @@ public class CategoryController {
             @RequestPart(value = "file", required = false) MultipartFile file) {
         ObjectMapper mapper = new ObjectMapper();
         CategoryDTO category = mapper.convertValue(categoryJson, CategoryDTO.class);
-
+        
         return ResponseEntity.ok(categoryService.save(category, file));
     }
 
