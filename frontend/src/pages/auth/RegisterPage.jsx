@@ -1,7 +1,7 @@
 import { useContext, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 
-import { REGISTER_ENDPOINT } from '../../config/config';
+import { REGISTER_ENDPOINT, RESEND_CONFIRMATION_ENDPOINT } from '../../config/config';
 import Swal from 'sweetalert2';
 import { AuthContext } from '../../components/AuthContext';
 
@@ -27,6 +27,7 @@ const RegisterPage = () => {
         });
     }
 
+    // Registration submit handler
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -80,22 +81,87 @@ const RegisterPage = () => {
             }
 
             Swal.fire({
-                title: '¡Registro existoso!',
-                text: 'Tu cuenta ha sido creada correctamente.',
+                title: '¡Registro exitoso!',
+                html: `
+                    <p>Tu cuenta ha sido creada correctamente.</p>
+                    <p>Enviamos un correo de confirmación a <b>${formData.email}</b>. Revisa tu bandeja de entrada o la carpeta de spam.</p>
+                `,
                 icon: 'success',
+                showDenyButton: true,
                 confirmButtonText: 'Ir al Login',
-                confirmButtonColor: '#2FBF71'
-            }).then(() => {
-                navigate('/login');
+                denyButtonText: 'Reenviar correo',
+                confirmButtonColor: '#2FBF71',
+                denyButtonColor: '#6c757d'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    navigate('/login');
+                } else if (result.isDenied) {
+                    handleResendConfirmation(formData.email);
+                }
             });
 
         } catch (error) {
             setError("¡Error en la conexión al servidor!")
             console.error(error);
         }
-
-
     }
+
+
+    // Resend confirmation
+    // Función para solicitar el reenvío del correo
+    const handleResendConfirmation = async (email) => {
+        Swal.fire({
+            title: 'Reenviando correo...',
+            text: 'Por favor, aguarda un momento.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        try {
+            const res = await fetch(RESEND_CONFIRMATION_ENDPOINT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+
+            if (res.ok) {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Correo reenviado!',
+                    text: `Hemos enviado nuevamente la confirmación a ${email}.`,
+                    showDenyButton: true,
+                    confirmButtonText: 'Ir al Login',
+                    denyButtonText: 'Reenviar correo',
+                    confirmButtonColor: '#2FBF71',
+                    denyButtonColor: '#6c757d'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        navigate('/login');
+                    } else if (result.isDenied) {
+                        handleResendConfirmation(formData.email);
+                    }
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo reenviar el correo. Verifica los datos o intenta más tarde.',
+                    confirmButtonText: 'Aceptar'
+                });
+            }
+        } catch (err) {
+            console.error(err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error de red',
+                text: 'No hubo respuesta del servidor al intentar reenviar el correo.'
+            });
+        }
+    };
+
+
 
     return (
         <div className='container-fluid card w-75 my-4 p-4'>
@@ -140,7 +206,7 @@ const RegisterPage = () => {
                 {isAuthenticated &&
                     <p>¡Ya tienes una sesión activa!</p>
                 }
-                <button type="submit" className={`btn btn-primary ${isAuthenticated ? 'disabled': '' } `}>Submit</button>
+                <button type="submit" className={`btn btn-primary ${isAuthenticated ? 'disabled' : ''} `}>Submit</button>
             </form>
         </div>
     )
