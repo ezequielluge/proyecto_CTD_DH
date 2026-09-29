@@ -35,7 +35,11 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         // Auth endpoints
-                        .requestMatchers("/auth/register", "/auth/login").permitAll()
+                        .requestMatchers(
+                            "/auth/register",
+                            "/auth/login",
+                            "/auth/resend-confirmation"
+                        ).permitAll()
                         .requestMatchers("/auth/validate").authenticated()
                         // Allows GET endpoints
                         .requestMatchers(

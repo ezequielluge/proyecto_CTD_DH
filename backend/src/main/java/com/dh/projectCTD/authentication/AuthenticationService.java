@@ -11,6 +11,7 @@ import com.dh.projectCTD.exception.UserAlreadyExistsException;
 import com.dh.projectCTD.model.Role;
 import com.dh.projectCTD.model.User;
 import com.dh.projectCTD.repository.IUserRepository;
+import com.dh.projectCTD.service.IEmailService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,6 +23,7 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final IEmailService emailService;
 
     public AuthenticationResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail()))
@@ -38,6 +40,8 @@ public class AuthenticationService {
         var savedUser = userRepository.save(user);
         var jwt = jwtService.generateToken(savedUser);
 
+        emailService.sendRegistrationConfirmation(savedUser.getEmail(), savedUser.getFirstname(), savedUser.getEmail());
+
         return AuthenticationResponse.builder()
                 .token(jwt)
                 .id(savedUser.getId())
@@ -46,6 +50,14 @@ public class AuthenticationService {
                 .email(savedUser.getEmail())
                 .role(savedUser.getRole().toString())
                 .build();
+    }
+
+    public void resendConfirmationEmail(String email) {
+        var user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "No se encontró un usuario registrado con el email: " + email));
+
+        emailService.sendRegistrationConfirmation(user.getEmail(), user.getFirstname(), user.getEmail());
     }
 
     public AuthenticationResponse login(AuthenticationRequest request) {
