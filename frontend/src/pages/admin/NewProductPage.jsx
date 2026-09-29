@@ -135,6 +135,7 @@ const NewProductPage = () => {
         <>
             <section className='m-3'>
                 <AdminPanelHeader title="Nuevo producto:" previousRoute={-1} />
+                <p className='fw-light'>Podrás agregar características al producto una vez creado, en el apartado correspondiente.</p>
                 <form
                     className="row g-3 mt-2"
                     onSubmit={handleSubmit}
