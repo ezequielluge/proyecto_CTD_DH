@@ -1,12 +1,15 @@
 package com.dh.projectCTD.exception;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 @ControllerAdvice
 public class GlobalException {
@@ -32,5 +35,24 @@ public class GlobalException {
     public ResponseEntity<String> processFeatureAlreadyExistsException(FeatureAlreadyExistsException exception) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(exception.getMessage());
     }
-    
+
+    // @Valid on @RequestBody / @RequestPart
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Map<String, String>>> processValidationException(MethodArgumentNotValidException exception) {
+        Map<String, String> errors = new LinkedHashMap<>();
+        exception.getBindingResult().getFieldErrors()
+                .forEach(error -> errors.putIfAbsent(error.getField(), error.getDefaultMessage()));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("errors", errors));
+    }
+
+    // Constraints placed directly on method parameters (@RequestParam, @PathVariable)
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<Map<String, Map<String, String>>> processMethodValidationException(HandlerMethodValidationException exception) {
+        Map<String, String> errors = new LinkedHashMap<>();
+        exception.getParameterValidationResults().forEach(result ->
+                result.getResolvableErrors().forEach(error ->
+                        errors.putIfAbsent(result.getMethodParameter().getParameterName(), error.getDefaultMessage())));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("errors", errors));
+    }
+
 }

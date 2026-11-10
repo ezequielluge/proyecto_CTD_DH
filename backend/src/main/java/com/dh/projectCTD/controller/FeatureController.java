@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.dh.projectCTD.dto.FeatureDTO;
 import com.dh.projectCTD.service.IFeatureService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,7 +32,7 @@ public class FeatureController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<FeatureDTO> saveFeature(@RequestBody FeatureDTO dto) {
+    public ResponseEntity<FeatureDTO> saveFeature(@Valid @RequestBody FeatureDTO dto) {
         return ResponseEntity.ok(featureService.save(dto));
     }
     
@@ -39,7 +40,7 @@ public class FeatureController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<FeatureDTO> updateFeature(
         @PathVariable Long id,
-        @RequestBody FeatureDTO dto
+        @Valid @RequestBody FeatureDTO dto
     ) {
         return ResponseEntity.ok(featureService.update(id, dto));
     }

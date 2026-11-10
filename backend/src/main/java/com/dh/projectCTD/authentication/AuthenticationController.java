@@ -28,14 +28,14 @@ public class AuthenticationController {
     }
 
     @PostMapping("/resend-confirmation")
-    public ResponseEntity<?> resendConfirmation(@RequestBody ResendEmailRequestDTO request) {
+    public ResponseEntity<?> resendConfirmation(@Valid @RequestBody ResendEmailRequestDTO request) {
         authenticationService.resendConfirmationEmail(request.getEmail());
         return ResponseEntity.ok("Correo de confirmación reenviado exitosamente.");
     }
 
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> login(
-            @RequestBody AuthenticationRequest request) {
+            @Valid @RequestBody AuthenticationRequest request) {
         return ResponseEntity.ok(authenticationService.login(request));
     }
 
