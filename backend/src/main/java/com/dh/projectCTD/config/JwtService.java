@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,13 @@ import io.jsonwebtoken.security.Keys;
 @Service
 public class JwtService {
 
-    private static final String SECRET_KEY = "fe5694d7db5053507f61214356e30b62fc8e1ba90d7e6fc2fae5d6aa58171738";
+    // Base64-encoded key of at least 256 bits (HS256). Set via JWT_SECRET environment variable.
+    @Value("${jwt.secret}")
+    private String secretKey;
+
+    // Token lifetime in milliseconds (default 86400000 = 24 hs)
+    @Value("${jwt.expiration}")
+    private long jwtExpiration;
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
@@ -34,7 +41,7 @@ public class JwtService {
     }
 
     private Key getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
@@ -43,7 +50,7 @@ public class JwtService {
         return claimsTFunction.apply(claims);
     }
 
-    // Generate token with claims and expiration time (24hs)
+    // Generate token with claims and expiration time (jwt.expiration)
     public String generateToken(
         Map<String, Object> extractClaims,
         UserDetails userDetails
@@ -53,7 +60,7 @@ public class JwtService {
             .setClaims(extractClaims)
             .setSubject(userDetails.getUsername())
             .setIssuedAt(new Date(System.currentTimeMillis()))
-            .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
+            .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
             .signWith(getSignInKey(), SignatureAlgorithm.HS256)
             .compact();
     }
