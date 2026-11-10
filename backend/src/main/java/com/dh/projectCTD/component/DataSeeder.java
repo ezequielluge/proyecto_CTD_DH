@@ -5,16 +5,17 @@ import com.dh.projectCTD.service.impl.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
-import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.File;
-import org.springframework.util.ResourceUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.dh.projectCTD.authentication.AuthenticationService;
@@ -41,7 +42,10 @@ public class DataSeeder implements CommandLineRunner {
     private final IFeatureService featureService;
     private final PasswordEncoder passwordEncoder;
 
-    private static final String DEFAULT_IMAGE_PATH = "classpath:default-image.jpg";
+    private static final String DEFAULT_IMAGE_PATH = "default-image.jpg";
+
+    // Bytes leídos una sola vez y reutilizados en todos los seeds
+    private byte[] defaultImageBytes;
 
     private Long defaultCategoryId;
     private String defaultCategoryName = "Alojamientos";
@@ -72,6 +76,7 @@ public class DataSeeder implements CommandLineRunner {
     @Transactional
     @Override
     public void run(String... args) throws Exception {
+        defaultImageBytes = loadDefaultImage();
         initialCategoryLoader();
         initialFeatureLoader();
         initialProductLoader();
@@ -84,21 +89,14 @@ public class DataSeeder implements CommandLineRunner {
         if (existingCategories.isEmpty()) {
             System.out.println("### Seeding initial categories data...");
 
-            // Default image mocking
-            File file = ResourceUtils.getFile(DEFAULT_IMAGE_PATH);
-            InputStream inputStream = Files.newInputStream(file.toPath());
-            MockMultipartFile mockFile = new MockMultipartFile(
-                    "file",
-                    "default-image.jpg",
-                    "image/jpeg",
-                    inputStream);
+            MultipartFile defaultImage = defaultImageFile("file");
 
             // DTO to save
             CategoryDTO cat1 = new CategoryDTO();
             cat1.setName(defaultCategoryName);
             cat1.setDescription("Categoría inicial");
 
-            categoryService.save(cat1, mockFile);
+            categoryService.save(cat1, defaultImage);
 
             defaultCategoryId = categoryService.findAll().get(0).getCategoryId();
 
@@ -115,17 +113,10 @@ public class DataSeeder implements CommandLineRunner {
         if (productService.findAll().isEmpty() && catName.equals(defaultCategoryName)) {
             System.out.println("### Seeding initial products data...");
 
-            // Default Image mocking
-            File file = ResourceUtils.getFile(DEFAULT_IMAGE_PATH);
-            InputStream inputStream = Files.newInputStream(file.toPath());
-            MockMultipartFile mockFile = new MockMultipartFile(
-                    "file",
-                    "default-image.jpg",
-                    "image/jpeg",
-                    inputStream);
+            MultipartFile defaultImage = defaultImageFile("files");
 
             List<MultipartFile> files = new ArrayList<>();
-            files.add(mockFile);
+            files.add(defaultImage);
 
             List<Long> featuresIds = new ArrayList<>();
             featuresIds.add(defaultFeatureId);
@@ -143,7 +134,7 @@ public class DataSeeder implements CommandLineRunner {
 
                 // Product list increment every 2 iterations
                 if (i % 2 == 0) {
-                    files.add(mockFile);
+                    files.add(defaultImage);
                 }
 
                 // Save product
@@ -189,6 +180,41 @@ public class DataSeeder implements CommandLineRunner {
         } else {
             System.out.println("### DB already has features. Skipping seeding.");
         }
+    }
+
+    // Lee la imagen por defecto desde el classpath (funciona también dentro del JAR)
+    private byte[] loadDefaultImage() throws IOException {
+        try (InputStream in = new ClassPathResource(DEFAULT_IMAGE_PATH).getInputStream()) {
+            return in.readAllBytes();
+        }
+    }
+
+    private MultipartFile defaultImageFile(String fieldName) {
+        return new ByteArrayMultipartFile(fieldName, DEFAULT_IMAGE_PATH, "image/jpeg", defaultImageBytes);
+    }
+
+    // Implementación mínima de MultipartFile en memoria, para no depender de spring-test
+    private static final class ByteArrayMultipartFile implements MultipartFile {
+        private final String name;
+        private final String originalFilename;
+        private final String contentType;
+        private final byte[] content;
+
+        ByteArrayMultipartFile(String name, String originalFilename, String contentType, byte[] content) {
+            this.name = name;
+            this.originalFilename = originalFilename;
+            this.contentType = contentType;
+            this.content = content != null ? content : new byte[0];
+        }
+
+        @Override public String getName() { return name; }
+        @Override public String getOriginalFilename() { return originalFilename; }
+        @Override public String getContentType() { return contentType; }
+        @Override public boolean isEmpty() { return content.length == 0; }
+        @Override public long getSize() { return content.length; }
+        @Override public byte[] getBytes() { return content; }
+        @Override public InputStream getInputStream() { return new ByteArrayInputStream(content); }
+        @Override public void transferTo(File dest) throws IOException { Files.write(dest.toPath(), content); }
     }
 
 }
